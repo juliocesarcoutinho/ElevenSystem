@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Recuperação de Senha - Eleven Juventude</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .header {
+            background-color: #f8f8f8;
+            padding: 10px;
+            text-align: center;
+        }
+        .content {
+            margin: 20px;
+        }
+        .footer {
+            background-color: #f8f8f8;
+            padding: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>Recuperação de Senha - Eleven Juventude</h1>
+</div>
+<div class="content">
+    <p>Olá, <strong th:text="${nome}">Usuário</strong>!</p>
+    <p>Você solicitou a recuperação de sua senha. Seus novos dados de acesso são:</p>
+    <p>Email: <strong th:text="${email}">email</strong></p>
+    <p>Nova Senha: <strong th:text="${novaSenha}">novaSenha</strong></p>
+    <p><strong>Importante:</strong> Por favor, atualize sua senha imediatamente após acessar o sistema.</p>
+    <p><strong>Onde trocar a senha:</strong> Acesse o recurso operador no canto superior direito, e clique no icone usuario.</p>
+    <p>Agradecemos por utilizar o nosso sistema.</p>
+</div>
+<div class="footer">
+    <p>&copy; 2024 Eleven Juventude. Todos os direitos reservados.</p>
+</div>
+</body>
+</html>

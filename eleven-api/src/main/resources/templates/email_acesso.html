@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Bem-vindo ao Eleven Juventude</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .header {
+            background-color: #f8f8f8;
+            padding: 10px;
+            text-align: center;
+        }
+        .content {
+            margin: 20px;
+        }
+        .footer {
+            background-color: #f8f8f8;
+            padding: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Bem-vindo ao Eleven Juventude</h1>
+    </div>
+    <div class="content">
+        <p>Olá, <strong th:text="${nome}">Usuário</strong>!</p>
+        <p>Seus dados de acesso são:</p>
+        <p>Email: <strong th:text="${email}">email</strong></p>
+        <p>Senha: <strong th:text="${senha}">senha</strong></p>
+        <p>Agradecemos por se cadastrar no nosso sistema.</p>
+    </div>
+    <div class="footer">
+        <p>&copy; 2024 Sistema Eleven. Todos os direitos reservados.</p>
+    </div>
+</body>
+</html>
