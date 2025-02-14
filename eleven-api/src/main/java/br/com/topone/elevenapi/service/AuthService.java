@@ -51,7 +51,7 @@ package br.com.topone.elevenapi.service;
             if (user == null) {
                 throw new ResourceNotFoundException("Email não encontrado");
             }
-    
+            
             String token = UUID.randomUUID().toString();
     
             var entity = new PasswordRecover();

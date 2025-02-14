@@ -30,7 +30,8 @@
     <p>Olá, <strong th:text="${nome}">Usuário</strong>!</p>
     <p>Você solicitou a recuperação de sua senha. Seus novos dados de acesso são:</p>
     <p>Email: <strong th:text="${email}">email</strong></p>
-    <p>Nova Senha: <strong th:text="${novaSenha}">novaSenha</strong></p>
+    <p>Para redefinir sua senha, clique no link abaixo:</p>
+    <p><a th:href="${recoverUri} + '?token=' + ${token}">Redefinir Senha</a></p>
     <p><strong>Importante:</strong> Por favor, atualize sua senha imediatamente após acessar o sistema.</p>
     <p><strong>Onde trocar a senha:</strong> Acesse o recurso operador no canto superior direito, e clique no icone usuario.</p>
     <p>Agradecemos por utilizar o nosso sistema.</p>
