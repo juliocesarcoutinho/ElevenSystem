@@ -47,6 +47,10 @@ public class ResourceServerConfig {
 
 		http.csrf(AbstractHttpConfigurer::disable);
 		http.authorizeHttpRequests(authorize -> authorize
+				
+				// ROTAS PUBLICAS
+				.requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
+				.requestMatchers(HttpMethod.PUT, "/auth/**").permitAll()
 
 				// USER
 				.requestMatchers(HttpMethod.GET, "/users/**").hasAnyRole("ADMIN", "OPERATOR")
