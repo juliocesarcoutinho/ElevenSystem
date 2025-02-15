@@ -1,4 +1,4 @@
-package br.com.topone.elevenapi.service;
+package br.com.topone.elevenapi.service.usuario;
 
 import br.com.topone.elevenapi.dtos.RoleDTO;
 import br.com.topone.elevenapi.dtos.user.UserDTO;
@@ -9,6 +9,7 @@ import br.com.topone.elevenapi.entities.User;
 import br.com.topone.elevenapi.projections.UserDetailsProjection;
 import br.com.topone.elevenapi.repositories.RoleRepository;
 import br.com.topone.elevenapi.repositories.UserRepository;
+import br.com.topone.elevenapi.service.EmailService;
 import br.com.topone.elevenapi.service.exceptions.DatabaseException;
 import br.com.topone.elevenapi.service.exceptions.EmailException;
 import br.com.topone.elevenapi.service.exceptions.ResourceNotFoundException;

@@ -1,14 +1,18 @@
 package br.com.topone.elevenapi.entities;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.Set;
 
 @Data
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "tb_user_profile")
 @EqualsAndHashCode(of = "id")
 public class UserProfile {
@@ -38,7 +42,7 @@ public class UserProfile {
     private User user;
     
     @OneToMany(mappedBy = "userProfile")
-    private Set<Adress> adress;
+    private Set<Address> addresses;
     
     
     

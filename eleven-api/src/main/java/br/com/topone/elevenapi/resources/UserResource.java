@@ -3,13 +3,12 @@ package br.com.topone.elevenapi.resources;
 import br.com.topone.elevenapi.dtos.user.UserDTO;
 import br.com.topone.elevenapi.dtos.user.UserInsertDTO;
 import br.com.topone.elevenapi.dtos.user.UserUpdateDTO;
-import br.com.topone.elevenapi.service.UserService;
+import br.com.topone.elevenapi.service.usuario.UserService;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 

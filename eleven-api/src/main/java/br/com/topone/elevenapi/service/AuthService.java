@@ -6,6 +6,7 @@ package br.com.topone.elevenapi.service;
     import br.com.topone.elevenapi.records.NewPasswordRecord;
     import br.com.topone.elevenapi.repositories.PasswordRecoverRepository;
     import br.com.topone.elevenapi.repositories.UserRepository;
+    import br.com.topone.elevenapi.service.exceptions.ForbiddenException;
     import br.com.topone.elevenapi.service.exceptions.ResourceNotFoundException;
     import jakarta.mail.MessagingException;
     import org.springframework.beans.factory.annotation.Value;
@@ -73,6 +74,14 @@ package br.com.topone.elevenapi.service;
             var user = userRepository.findByEmail(result.get(0).getEmail());
             user.setPassword(passwordEncoder.encode(body.password()));
             user = userRepository.save(user);
+        }
+
+        @Transactional(readOnly = true)
+        public void validateSelfOrAdmin(Long userId) {
+            var user = authenticated();
+            if (!user.getId().equals(userId) && !user.hasRole("ROLE_ADMIN")) {
+                throw new ForbiddenException("Acesso negado");
+            }
         }
     
         protected User authenticated() {

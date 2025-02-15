@@ -1,14 +1,16 @@
 package br.com.topone.elevenapi.entities;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Data
 @Entity
-@Table(name = "tb_adress")
+@Table(name = "tb_address")
 @EqualsAndHashCode(of = "id")
-public class Adress {
+public class Address {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,4 +41,18 @@ public class Adress {
     @JoinColumn(name = "user_profile_id")
     private UserProfile userProfile;
     
+    public Address() {
+    }
+    
+    public Address(Long id, String zipCode, String street, String city, String number, String complement, 
+                   String district, String uf) {
+        this.id = id;
+        this.zipCode = zipCode;
+        this.street = street;
+        this.city = city;
+        this.number = number;
+        this.complement = complement;
+        this.district = district;
+        this.uf = uf;
+    }
 }
