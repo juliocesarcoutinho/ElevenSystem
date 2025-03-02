@@ -1,7 +1,10 @@
 package br.com.topone.elevenapi.records;
 
-import br.com.topone.elevenapi.entities.User;
+import br.com.topone.elevenapi.dtos.user.UserDTO;
 import br.com.topone.elevenapi.entities.UserProfile;
+import jakarta.validation.constraints.NotBlank;
+import org.hibernate.validator.constraints.UniqueElements;
+import org.hibernate.validator.constraints.br.CPF;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -14,7 +17,7 @@ public record UserProfileRecord(
         String phone,
         String motherName,
         String fatherName,
-        User user,
+        UserDTO user,
         Set<AddressRecord> address
         
 ) {
@@ -27,7 +30,7 @@ public record UserProfileRecord(
                 userProfile.getPhone(),
                 userProfile.getMotherName(),
                 userProfile.getFatherName(),
-                userProfile.getUser(),
+                new UserDTO(userProfile.getUser()),
                 userProfile.getAddresses().stream().map(address -> new AddressRecord(
                         address.getId(),
                         address.getZipCode(),

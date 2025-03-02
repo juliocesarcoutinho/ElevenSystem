@@ -41,7 +41,7 @@ public class UserProfile {
     @JoinColumn(name = "user_id")
     private User user;
     
-    @OneToMany(mappedBy = "userProfile")
+    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Address> addresses;
     
     
