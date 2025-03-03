@@ -9,6 +9,7 @@ import { InputMask } from "primereact/inputmask";
 import { Button } from "primereact/button";
 import { UserProfileService } from "@/demo/services/usuario/UserProfile";
 import { Toast } from "primereact/toast";
+import "primeflex/primeflex.css"; // Importação do PrimeFlex
 
 interface UserProfile {
   id: number;
@@ -126,9 +127,9 @@ const PersonDataTable = () => {
       >
         {selectedProfile && (
           <div className="p-fluid">
-            <div className="p-grid">
+            <div className="formgrid grid">
               {/* Coluna 1: Dados Pessoais */}
-              <div className="p-col-12 p-md-6">
+              <div className="field col-12 md:col-6">
                 <div className="field">
                   <label htmlFor="name">Nome</label>
                   <InputText
@@ -228,11 +229,29 @@ const PersonDataTable = () => {
               </div>
 
               {/* Coluna 2: Endereço */}
-              <div className="p-col-12 p-md-6">
+              <div className="field col-12 md:col-6">
                 <div className="field">
-                  <label htmlFor="address">Endereço</label>
                   {selectedProfile.address.map((addr) => (
                     <div key={addr.id} className="p-fluid">
+                      {/* Campo CEP */}
+                      <div className="field">
+                        <label htmlFor="cep">CEP</label>
+                        <InputMask
+                          id="cep"
+                          value={addr.zipCode}
+                          onChange={(e) =>
+                            setSelectedProfile({
+                              ...selectedProfile,
+                              address: selectedProfile.address.map((a) =>
+                                a.id === addr.id
+                                  ? { ...a, zipCode: e.value ?? "" }
+                                  : a
+                              ),
+                            })
+                          }
+                          mask="99999-999"
+                        />
+                      </div>
                       <div className="field">
                         <label htmlFor="street">Rua</label>
                         <InputText
