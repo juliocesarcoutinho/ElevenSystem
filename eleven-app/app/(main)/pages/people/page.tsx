@@ -1,14 +1,13 @@
 "use client";
-import React from 'react';
-
-
+import React from "react";
+import PersonDataTable from "@/demo/components/persons/PersonDataTable";
 
 const PersonPage = () => {
-    return (
-        <div>
-            <h1>Pessoas</h1>
-        </div>
-    );
+  return (
+    <div>
+      <PersonDataTable />
+    </div>
+  );
 };
 
 export default PersonPage;
