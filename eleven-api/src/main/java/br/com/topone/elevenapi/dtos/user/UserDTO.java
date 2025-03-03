@@ -43,6 +43,14 @@ public class UserDTO {
         this.updatedAt = updatedAt;
     }
 
+   private String mapAuthority(String authority) {
+       return switch (authority) {
+           case "OPERATOR" -> "OPERADOR";
+           case "ADMIN" -> "ADMINISTRADOR";
+           default -> authority;
+       };
+    }
+    
     public UserDTO(User entity) {
         id = entity.getId();
         name = entity.getName();
@@ -52,6 +60,7 @@ public class UserDTO {
         updatedAt = entity.getUpdatedAt();
         entity.getRoles().forEach(role -> {
             String authority = role.getAuthority().replaceFirst("^ROLE_", "");
+            authority = mapAuthority(authority);
             roles.add(new RoleDTO(role.getId(), authority));
         });
     }
