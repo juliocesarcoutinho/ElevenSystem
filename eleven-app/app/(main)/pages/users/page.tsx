@@ -156,7 +156,7 @@ const CadastroUsuario = () => {
         toast.current?.show({
           severity: "warn",
           summary: "Aviso",
-          detail: response.message,
+          detail: response.message, // Aqui agora exibe apenas as mensagens relevantes
           life: 3000,
         });
       }

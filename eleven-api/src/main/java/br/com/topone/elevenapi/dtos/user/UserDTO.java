@@ -2,6 +2,7 @@ package br.com.topone.elevenapi.dtos.user;
 
 import br.com.topone.elevenapi.dtos.RoleDTO;
 import br.com.topone.elevenapi.entities.User;
+import br.com.topone.elevenapi.service.validation.ValidEmailDomain;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
@@ -22,6 +23,7 @@ public class UserDTO {
     private String name;
 
     @Email(message = "O email inserido é invalido")
+    @ValidEmailDomain(message = "O domínio do email inserido é inválido")
     @NotBlank(message = "O campo email é obrigatório")
     private String email;
 

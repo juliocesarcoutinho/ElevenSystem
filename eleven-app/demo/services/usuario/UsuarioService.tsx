@@ -63,9 +63,12 @@ export const UsuarioService = {
     try {
       await api.delete(`/users/${id}`);
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao deletar usuário:", error);
-      return false;
+      if (error.response?.status === 403) {
+        throw new Error("Operador não autorizado para excluir usuário");
+      }
+      throw new Error("Erro ao excluir usuário");
     }
   },
 
@@ -90,7 +93,6 @@ export const UsuarioService = {
     }
   },
 
-  // Método para criar um usuário
   async createUsuario(usuario: {
     password: string;
     active: boolean;
@@ -106,12 +108,16 @@ export const UsuarioService = {
     } catch (error: any) {
       console.error("Erro ao criar usuário:", error);
       let errorMessage = "Erro ao salvar o usuário.";
-      if (error.response?.status === 400 && error.response?.data) {
-        const validationErrors = error.response.data;
-        errorMessage = Object.values(validationErrors).join(", ");
+
+      if (error.response?.status === 422 && error.response?.data?.errors) {
+        // Extraindo mensagens do array `errors`
+        errorMessage = error.response.data.errors
+          .map((err: { message: string }) => err.message)
+          .join("\n");
       } else {
         errorMessage = error.response?.data?.message || errorMessage;
       }
+
       return { success: false, message: errorMessage };
     }
   },
