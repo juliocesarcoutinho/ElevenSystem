@@ -39,7 +39,7 @@ public class UserUpdateValidator implements ConstraintValidator<UserUpdateValid,
         
         var user = userRepository.findByEmail(dto.getEmail());
         if (user != null && userId != user.getId()) {
-            list.add(new FieldMessage("email", "Email já existente"));
+            list.add(new FieldMessage("email", "Já existe um usuário com este email"));
         }
 
         for (FieldMessage e : list) {
