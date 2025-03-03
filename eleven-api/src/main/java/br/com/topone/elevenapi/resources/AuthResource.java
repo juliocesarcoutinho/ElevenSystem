@@ -1,11 +1,13 @@
 package br.com.topone.elevenapi.resources;
 
+import br.com.topone.elevenapi.dtos.user.UserDTO;
 import br.com.topone.elevenapi.records.EmailRecord;
 import br.com.topone.elevenapi.records.NewPasswordRecord;
 import br.com.topone.elevenapi.service.AuthService;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

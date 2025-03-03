@@ -9,6 +9,7 @@ import br.com.topone.elevenapi.entities.User;
 import br.com.topone.elevenapi.projections.UserDetailsProjection;
 import br.com.topone.elevenapi.repositories.RoleRepository;
 import br.com.topone.elevenapi.repositories.UserRepository;
+import br.com.topone.elevenapi.service.AuthService;
 import br.com.topone.elevenapi.service.EmailService;
 import br.com.topone.elevenapi.service.exceptions.DatabaseException;
 import br.com.topone.elevenapi.service.exceptions.EmailException;
@@ -41,16 +42,19 @@ public class UserService implements UserDetailsService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private EmailService emailService;
+    private AuthService authService;
 
     public UserService(
             UserRepository repository,
             RoleRepository roleRepository,
             PasswordEncoder passwordEncoder,
-            EmailService emailService) {
+            EmailService emailService,
+            AuthService authService) {
         this.repository = repository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+        this.authService = authService;
     }
 
     @Override
@@ -83,6 +87,13 @@ public class UserService implements UserDetailsService {
     public UserDTO findById(Long id) {
         Optional<User> obj = repository.findById(id);
         var entity = obj.orElseThrow(() -> new ResourceNotFoundException(STR."Entidade não encontrada com ID: \{id}"));
+        return new UserDTO(entity);
+    }
+    
+    // find me logged user
+    @Transactional(readOnly = true)
+    public UserDTO findMe() {
+        var entity = authService.authenticated();
         return new UserDTO(entity);
     }
 

@@ -35,6 +35,13 @@ public class UserResource {
         var dto = service.findById(id);
         return ResponseEntity.ok().body(dto);
     }
+
+    // find user logged
+    @GetMapping(value = "/me")
+    public ResponseEntity<UserDTO> findById() {
+        var dto = service.findMe();
+        return ResponseEntity.ok().body(dto);
+    }
     
     // insert user
     @PostMapping
