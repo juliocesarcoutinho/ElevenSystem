@@ -1,6 +1,8 @@
 package br.com.topone.elevenapi.dtos.user;
 
 import br.com.topone.elevenapi.service.validation.UserInsertValid;
+import br.com.topone.elevenapi.service.validation.ValidEmailDomain;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
