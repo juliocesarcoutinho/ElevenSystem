@@ -129,6 +129,7 @@ public class UserService implements UserDetailsService {
         try {
             var entity = repository.getReferenceById(id);
             copyDtoToEntity(dto, entity);
+            entity.setPassword(passwordEncoder.encode(dto.getPassword()));
             entity = repository.save(entity);
             return new UserDTO(entity);
         } catch (EntityNotFoundException e) {
