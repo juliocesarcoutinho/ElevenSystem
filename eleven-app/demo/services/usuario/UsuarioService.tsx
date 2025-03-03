@@ -137,6 +137,22 @@ export const UsuarioService = {
       return null;
     }
   },
+
+  // Find User logged
+  async getMe(): Promise<User | null> {
+    try {
+      const response = await api.get("/users/me");
+      const user = response.data;
+      return {
+        ...user,
+        ativo:
+          typeof user.active === "string" ? user.active === "Sim" : user.active,
+      };
+    } catch (error) {
+      console.error("Erro ao buscar usuário logado:", error);
+      return null;
+    }
+  },
 };
 
 export default UsuarioService;
