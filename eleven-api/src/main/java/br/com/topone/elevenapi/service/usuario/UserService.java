@@ -7,6 +7,7 @@ import br.com.topone.elevenapi.dtos.user.UserUpdateDTO;
 import br.com.topone.elevenapi.entities.Role;
 import br.com.topone.elevenapi.entities.User;
 import br.com.topone.elevenapi.projections.UserDetailsProjection;
+import br.com.topone.elevenapi.records.UserWithProfileRecord;
 import br.com.topone.elevenapi.repositories.RoleRepository;
 import br.com.topone.elevenapi.repositories.UserRepository;
 import br.com.topone.elevenapi.service.AuthService;
@@ -32,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService {

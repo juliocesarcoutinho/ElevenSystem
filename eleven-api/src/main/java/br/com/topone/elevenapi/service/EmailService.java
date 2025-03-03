@@ -4,6 +4,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.SendFailedException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -15,14 +16,22 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
+    private final String activeProfile;
 
     @Autowired
-    public EmailService(JavaMailSender mailSender, SpringTemplateEngine templateEngine) {
+    public EmailService(JavaMailSender mailSender, SpringTemplateEngine templateEngine, @Value("${spring.profiles.active}") String activeProfile) {
         this.mailSender = mailSender;
         this.templateEngine = templateEngine;
+        this.activeProfile = activeProfile;
     }
 
     public void sendWelcomeEmail(String to, String nome, String email, String senha) throws MessagingException {
+
+        if ("test".equals(activeProfile)) {
+            System.out.println("Perfil de desenvolvimento ativo. E-mail não será enviado.");
+            return;
+        }
+
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
@@ -41,13 +50,13 @@ public class EmailService {
 
             mailSender.send(message);
         } catch (SendFailedException e) {
-            System.err.println(STR."Erro ao enviar e-mail: \{e.getMessage()}");
+            System.err.println(String.format("Erro ao enviar e-mail: %s", e.getMessage()));
             if (e.getNextException() instanceof jakarta.mail.internet.AddressException) {
-                System.err.println(STR."Endereço de e-mail inválido: \{e.getNextException().getMessage()}");
+                System.err.println(String.format("Endereço de e-mail inválido: %s", e.getNextException().getMessage()));
             }
             throw e;
         } catch (MessagingException e) {
-            System.err.println(STR."Erro de mensagem: \{e.getMessage()}");
+            System.err.println(String.format("Erro de mensagem: %s", e.getMessage()));
             throw e;
         }
     }
@@ -72,7 +81,7 @@ public class EmailService {
 
             mailSender.send(message);
         } catch (MessagingException e) {
-            System.err.println(STR."Erro de mensagem: \{e.getMessage()}");
+            System.err.println(String.format("Erro de mensagem: %s", e.getMessage()));
             throw e;
         }
     }

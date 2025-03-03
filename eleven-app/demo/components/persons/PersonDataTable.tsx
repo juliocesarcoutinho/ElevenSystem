@@ -7,86 +7,98 @@ import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { InputMask } from "primereact/inputmask";
 import { Button } from "primereact/button";
-import { UserProfileService } from "@/demo/services/usuario/UserProfile";
 import { Toast } from "primereact/toast";
-import "primeflex/primeflex.css"; // Importação do PrimeFlex
+import "primeflex/primeflex.css";
+import { UserProfileService } from "@/demo/services/usuario/UserProfileService"; // Importação do PrimeFlex
 
-interface UserProfile {
+interface Address {
   id: number;
-  cpf: string;
-  birthDate: string;
-  phone: string;
-  motherName: string;
-  fatherName: string;
-  user: {
-    id: number;
-    name: string;
-    email: string;
-    active: boolean;
-    createdAt: string;
-    updatedAt: string;
-    roles: { id: number; authority: string }[];
-  };
-  address: {
-    id: number;
-    zipCode: string;
-    street: string;
-    number: string;
-    complement: string;
-    district: string;
-    city: string;
-    uf: string;
-  }[];
+  zipCode: string;
+  street: string;
+  number: string;
+  complement: string;
+  district: string;
+  city: string;
+  uf: string;
+}
+
+interface UserWithProfile {
+  id: number;
+  name: string;
+  email: string;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+  userProfileId: number | null;
+  cpf: string | null;
+  birthDate: string | null;
+  phone: string | null;
+  motherName: string | null;
+  fatherName: string | null;
+  addresses: Address[] | null; // Lista de endereços (pode ser null)
 }
 
 const PersonDataTable = () => {
-  const [userProfiles, setUserProfiles] = useState<UserProfile[]>([]);
+  const [usersWithProfiles, setUsersWithProfiles] = useState<UserWithProfile[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
-  const [selectedProfile, setSelectedProfile] = useState<UserProfile | null>(
+  const [selectedUser, setSelectedUser] = useState<UserWithProfile | null>(
     null
   );
   const [visibleDialog, setVisibleDialog] = useState(false);
   const toast = useRef<Toast>(null);
 
   useEffect(() => {
-    const fetchUserProfiles = async () => {
+    const fetchUsersWithProfiles = async () => {
       try {
         setLoading(true);
-        const { content } = await UserProfileService.getUserProfiles();
-        setUserProfiles(content);
+        const users = await UserProfileService.getUsersWithProfiles();
+        setUsersWithProfiles(users);
       } catch (error) {
-        console.error("Erro ao buscar perfis de usuário:", error);
+        console.error("Erro ao buscar usuários com perfis:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUserProfiles();
+    fetchUsersWithProfiles();
   }, []);
 
-  const handleRowClick = (rowData: UserProfile) => {
-    setSelectedProfile(rowData);
+  // const handleRowClick = (rowData: UserWithProfile) => {
+  //   setSelectedUser(rowData);
+  //   setVisibleDialog(true);
+  // };
+
+  const handleRowClick = (rowData: UserWithProfile) => {
+    // Se não houver endereços, adiciona um endereço vazio
+    const userWithAddresses = {
+      ...rowData,
+      addresses: rowData.addresses?.length ? rowData.addresses : [emptyAddress],
+    };
+
+    setSelectedUser(userWithAddresses);
     setVisibleDialog(true);
   };
 
   const handleSave = async () => {
-    if (selectedProfile) {
+    if (selectedUser) {
       try {
-        // Aqui você pode chamar o serviço para atualizar o perfil na API
-        // await UserProfileService.updateUserProfile(selectedProfile);
+        // Aqui você pode chamar o serviço para salvar ou atualizar o perfil
+        // await UserProfileService.saveOrUpdateProfile(selectedUser);
         toast.current?.show({
           severity: "success",
           summary: "Sucesso",
-          detail: "Perfil atualizado com sucesso",
+          detail: "Perfil salvo com sucesso",
           life: 3000,
         });
         setVisibleDialog(false);
       } catch (error) {
-        console.error("Erro ao atualizar perfil:", error);
+        console.error("Erro ao salvar perfil:", error);
         toast.current?.show({
           severity: "error",
           summary: "Erro",
-          detail: "Erro ao atualizar perfil",
+          detail: "Erro ao salvar perfil",
           life: 3000,
         });
       }
@@ -101,11 +113,23 @@ const PersonDataTable = () => {
     );
   }
 
+  // Endereço vazio
+  const emptyAddress = {
+    id: 0, // ID temporário
+    zipCode: "",
+    street: "",
+    number: "",
+    complement: "",
+    district: "",
+    city: "",
+    uf: "",
+  };
+
   return (
     <div className="card">
-      <h1>Perfis de Usuários</h1>
+      <h1>Usuários com Perfis</h1>
       <DataTable
-        value={userProfiles}
+        value={usersWithProfiles}
         paginator
         rows={10}
         rowsPerPageOptions={[5, 10, 25, 50]}
@@ -113,10 +137,18 @@ const PersonDataTable = () => {
         selectionMode="single"
       >
         <Column field="id" header="ID" sortable />
-        <Column field="user.name" header="Nome" sortable />
-        <Column field="cpf" header="CPF" sortable />
-        <Column field="phone" header="Telefone" sortable />
-        <Column field="user.email" header="Email" sortable />
+        <Column field="name" header="Nome" sortable />
+        <Column field="email" header="Email" sortable />
+        <Column
+          field="cpf"
+          header="CPF"
+          body={(rowData) => rowData.cpf || "Não informado"}
+        />
+        <Column
+          field="phone"
+          header="Telefone"
+          body={(rowData) => rowData.phone || "Não informado"}
+        />
       </DataTable>
 
       <Dialog
@@ -125,7 +157,7 @@ const PersonDataTable = () => {
         style={{ width: "50vw" }}
         onHide={() => setVisibleDialog(false)}
       >
-        {selectedProfile && (
+        {selectedUser && (
           <div className="p-fluid">
             <div className="formgrid grid">
               {/* Coluna 1: Dados Pessoais */}
@@ -134,11 +166,11 @@ const PersonDataTable = () => {
                   <label htmlFor="name">Nome</label>
                   <InputText
                     id="name"
-                    value={selectedProfile.user.name}
+                    value={selectedUser.name}
                     onChange={(e) =>
-                      setSelectedProfile({
-                        ...selectedProfile,
-                        user: { ...selectedProfile.user, name: e.target.value },
+                      setSelectedUser({
+                        ...selectedUser,
+                        name: e.target.value,
                       })
                     }
                   />
@@ -147,14 +179,11 @@ const PersonDataTable = () => {
                   <label htmlFor="email">Email</label>
                   <InputText
                     id="email"
-                    value={selectedProfile.user.email}
+                    value={selectedUser.email}
                     onChange={(e) =>
-                      setSelectedProfile({
-                        ...selectedProfile,
-                        user: {
-                          ...selectedProfile.user,
-                          email: e.target.value,
-                        },
+                      setSelectedUser({
+                        ...selectedUser,
+                        email: e.target.value,
                       })
                     }
                   />
@@ -163,10 +192,10 @@ const PersonDataTable = () => {
                   <label htmlFor="cpf">CPF</label>
                   <InputMask
                     id="cpf"
-                    value={selectedProfile.cpf}
+                    value={selectedUser.cpf || ""}
                     onChange={(e) =>
-                      setSelectedProfile({
-                        ...selectedProfile,
+                      setSelectedUser({
+                        ...selectedUser,
                         cpf: e.value ?? "",
                       })
                     }
@@ -177,10 +206,10 @@ const PersonDataTable = () => {
                   <label htmlFor="phone">Telefone</label>
                   <InputMask
                     id="phone"
-                    value={selectedProfile.phone}
+                    value={selectedUser.phone || ""}
                     onChange={(e) =>
-                      setSelectedProfile({
-                        ...selectedProfile,
+                      setSelectedUser({
+                        ...selectedUser,
                         phone: e.value ?? "",
                       })
                     }
@@ -191,10 +220,10 @@ const PersonDataTable = () => {
                   <label htmlFor="birthDate">Data de Nascimento</label>
                   <InputText
                     id="birthDate"
-                    value={selectedProfile.birthDate}
+                    value={selectedUser.birthDate || ""}
                     onChange={(e) =>
-                      setSelectedProfile({
-                        ...selectedProfile,
+                      setSelectedUser({
+                        ...selectedUser,
                         birthDate: e.target.value,
                       })
                     }
@@ -204,10 +233,10 @@ const PersonDataTable = () => {
                   <label htmlFor="motherName">Nome da Mãe</label>
                   <InputText
                     id="motherName"
-                    value={selectedProfile.motherName}
+                    value={selectedUser.motherName || ""}
                     onChange={(e) =>
-                      setSelectedProfile({
-                        ...selectedProfile,
+                      setSelectedUser({
+                        ...selectedUser,
                         motherName: e.target.value,
                       })
                     }
@@ -217,10 +246,10 @@ const PersonDataTable = () => {
                   <label htmlFor="fatherName">Nome do Pai</label>
                   <InputText
                     id="fatherName"
-                    value={selectedProfile.fatherName}
+                    value={selectedUser.fatherName || ""}
                     onChange={(e) =>
-                      setSelectedProfile({
-                        ...selectedProfile,
+                      setSelectedUser({
+                        ...selectedUser,
                         fatherName: e.target.value,
                       })
                     }
@@ -231,18 +260,18 @@ const PersonDataTable = () => {
               {/* Coluna 2: Endereço */}
               <div className="field col-12 md:col-6">
                 <div className="field">
-                  {selectedProfile.address.map((addr) => (
+                  <label htmlFor="address">Endereço</label>
+                  {selectedUser.addresses?.map((addr) => (
                     <div key={addr.id} className="p-fluid">
-                      {/* Campo CEP */}
                       <div className="field">
-                        <label htmlFor="cep">CEP</label>
+                        <label htmlFor="zipCode">CEP</label>
                         <InputMask
-                          id="cep"
+                          id="zipCode"
                           value={addr.zipCode}
                           onChange={(e) =>
-                            setSelectedProfile({
-                              ...selectedProfile,
-                              address: selectedProfile.address.map((a) =>
+                            setSelectedUser({
+                              ...selectedUser,
+                              addresses: selectedUser.addresses?.map((a) =>
                                 a.id === addr.id
                                   ? { ...a, zipCode: e.value ?? "" }
                                   : a
@@ -257,9 +286,9 @@ const PersonDataTable = () => {
                         <InputText
                           value={addr.street}
                           onChange={(e) =>
-                            setSelectedProfile({
-                              ...selectedProfile,
-                              address: selectedProfile.address.map((a) =>
+                            setSelectedUser({
+                              ...selectedUser,
+                              addresses: selectedUser.addresses?.map((a) =>
                                 a.id === addr.id
                                   ? { ...a, street: e.target.value }
                                   : a
@@ -273,9 +302,9 @@ const PersonDataTable = () => {
                         <InputText
                           value={addr.number}
                           onChange={(e) =>
-                            setSelectedProfile({
-                              ...selectedProfile,
-                              address: selectedProfile.address.map((a) =>
+                            setSelectedUser({
+                              ...selectedUser,
+                              addresses: selectedUser.addresses?.map((a) =>
                                 a.id === addr.id
                                   ? { ...a, number: e.target.value }
                                   : a
@@ -289,9 +318,9 @@ const PersonDataTable = () => {
                         <InputText
                           value={addr.complement}
                           onChange={(e) =>
-                            setSelectedProfile({
-                              ...selectedProfile,
-                              address: selectedProfile.address.map((a) =>
+                            setSelectedUser({
+                              ...selectedUser,
+                              addresses: selectedUser.addresses?.map((a) =>
                                 a.id === addr.id
                                   ? { ...a, complement: e.target.value }
                                   : a
@@ -305,9 +334,9 @@ const PersonDataTable = () => {
                         <InputText
                           value={addr.district}
                           onChange={(e) =>
-                            setSelectedProfile({
-                              ...selectedProfile,
-                              address: selectedProfile.address.map((a) =>
+                            setSelectedUser({
+                              ...selectedUser,
+                              addresses: selectedUser.addresses?.map((a) =>
                                 a.id === addr.id
                                   ? { ...a, district: e.target.value }
                                   : a
@@ -321,9 +350,9 @@ const PersonDataTable = () => {
                         <InputText
                           value={addr.city}
                           onChange={(e) =>
-                            setSelectedProfile({
-                              ...selectedProfile,
-                              address: selectedProfile.address.map((a) =>
+                            setSelectedUser({
+                              ...selectedUser,
+                              addresses: selectedUser.addresses?.map((a) =>
                                 a.id === addr.id
                                   ? { ...a, city: e.target.value }
                                   : a
@@ -336,10 +365,11 @@ const PersonDataTable = () => {
                         <label htmlFor="uf">UF</label>
                         <InputText
                           value={addr.uf}
+                          yarn
                           onChange={(e) =>
-                            setSelectedProfile({
-                              ...selectedProfile,
-                              address: selectedProfile.address.map((a) =>
+                            setSelectedUser({
+                              ...selectedUser,
+                              addresses: selectedUser.addresses?.map((a) =>
                                 a.id === addr.id
                                   ? { ...a, uf: e.target.value }
                                   : a

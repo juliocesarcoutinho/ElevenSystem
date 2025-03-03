@@ -3,6 +3,7 @@ package br.com.topone.elevenapi.resources;
 import br.com.topone.elevenapi.dtos.user.UserDTO;
 import br.com.topone.elevenapi.dtos.user.UserInsertDTO;
 import br.com.topone.elevenapi.dtos.user.UserUpdateDTO;
+import br.com.topone.elevenapi.records.UserWithProfileRecord;
 import br.com.topone.elevenapi.service.usuario.UserService;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
@@ -11,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/users")

@@ -39,6 +39,7 @@ public class UserProfile {
     
     @OneToOne
     @JoinColumn(name = "user_id")
+    @MapsId
     private User user;
     
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)

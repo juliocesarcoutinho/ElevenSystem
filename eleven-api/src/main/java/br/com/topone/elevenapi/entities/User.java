@@ -48,6 +48,7 @@ public class User implements UserDetails {
     private Instant updatedAt;
     
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_profile_id")
     private UserProfile profile;
 
     @ManyToMany(fetch = FetchType.EAGER)
