@@ -2,7 +2,7 @@ import axios from "axios";
 import config from "../../config/config";
 
 const api = axios.create({
-  baseURL: config.API_BASE_URL_LOGIN,
+  baseURL: config.API_BASE_URL,
 });
 
 export const LoginService = {
@@ -15,19 +15,16 @@ export const LoginService = {
     client_secret: string
   ): Promise<{ success: boolean; data?: any; message?: string }> {
     try {
-      // Codifica client_id e client_secret em Base64
       const basicAuth = Buffer.from(`${client_id}:${client_secret}`).toString(
         "base64"
       );
-
-      // Faz a requisição com o cabeçalho de autorização
       const response = await api.post(
         "/oauth2/token",
-        {
+        new URLSearchParams({
           grant_type: "password",
           username: email,
           password: password,
-        },
+        }),
         {
           headers: {
             Authorization: `Basic ${basicAuth}`,
@@ -45,6 +42,13 @@ export const LoginService = {
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
+        if (error.response?.status === 400) {
+          return {
+            success: false,
+            message: error.response?.data.error || "Credenciais inválidas",
+          };
+        }
+        // Trata outros erros
         return {
           success: false,
           message: error.response?.data.message || "Erro inesperado",

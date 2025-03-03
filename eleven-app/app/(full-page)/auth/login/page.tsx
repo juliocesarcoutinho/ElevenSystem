@@ -102,21 +102,23 @@ const LoginPage = () => {
       );
 
       if (response.success) {
-        localStorage.setItem("authToken", response.data.access_token); // Armazena o token
+        localStorage.setItem("authToken", response.data.access_token);
         router.push("/pages/dashboard");
+      } else {
+        // Exibe a mensagem de erro no toast
         toast.current?.show({
           severity: "error",
           summary: "Erro",
-          detail: response.message || "Token não encontrado na resposta",
+          detail: "Credenciais Inválidas",
           life: 3000,
         });
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
+      // Exibe uma mensagem de erro genérica no toast
       toast.current?.show({
         severity: "error",
         summary: "Erro",
-        detail: "Erro no login. Verifique suas credenciais.",
+        detail: "Erro inesperado no login",
         life: 3000,
       });
     }

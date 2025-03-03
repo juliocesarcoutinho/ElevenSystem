@@ -50,6 +50,9 @@ public class UserDTO {
         active = entity.isActive();
         createdAt = entity.getCreatedAt();
         updatedAt = entity.getUpdatedAt();
-        entity.getRoles().forEach(role -> roles.add(new RoleDTO(role)));
+        entity.getRoles().forEach(role -> {
+            String authority = role.getAuthority().replaceFirst("^ROLE_", "");
+            roles.add(new RoleDTO(role.getId(), authority));
+        });
     }
 }
