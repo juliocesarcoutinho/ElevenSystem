@@ -10,6 +10,7 @@ declare namespace Demo {
     id?: number | null;
     name: string;
     email: string;
+    password: string;
     active: boolean;
     created: string;
     updated: string;
