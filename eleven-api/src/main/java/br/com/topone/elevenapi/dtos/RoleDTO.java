@@ -20,7 +20,16 @@ public class RoleDTO {
 
     public RoleDTO(Role role) {
         id = role.getId();
-        authority = role.getAuthority();
+        authority = mapAuthority(role.getAuthority());
+    }
+
+    private String mapAuthority(String authority) {
+        authority = authority.replaceFirst("^ROLE_", "");
+        return switch (authority) {
+            case "OPERATOR" -> "OPERADOR";
+            case "ADMIN" -> "ADMINISTRADOR";
+            default -> authority;
+        };
     }
     
 }
