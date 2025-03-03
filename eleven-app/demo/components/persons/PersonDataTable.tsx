@@ -126,180 +126,216 @@ const PersonDataTable = () => {
       >
         {selectedProfile && (
           <div className="p-fluid">
-            <div className="field">
-              <label htmlFor="name">Nome</label>
-              <InputText
-                id="name"
-                value={selectedProfile.user.name}
-                onChange={(e) =>
-                  setSelectedProfile({
-                    ...selectedProfile,
-                    user: { ...selectedProfile.user, name: e.target.value },
-                  })
-                }
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="email">Email</label>
-              <InputText
-                id="email"
-                value={selectedProfile.user.email}
-                onChange={(e) =>
-                  setSelectedProfile({
-                    ...selectedProfile,
-                    user: { ...selectedProfile.user, email: e.target.value },
-                  })
-                }
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="cpf">CPF</label>
-              <InputMask
-                id="cpf"
-                value={selectedProfile.cpf}
-                onChange={(e) =>
-                  setSelectedProfile({
-                    ...selectedProfile,
-                    cpf: e.value ?? "",
-                  })
-                }
-                mask="999.999.999-99"
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="phone">Telefone</label>
-              <InputMask
-                id="phone"
-                value={selectedProfile.phone}
-                onChange={(e) =>
-                  setSelectedProfile({
-                    ...selectedProfile,
-                    phone: e.value ?? "",
-                  })
-                }
-                mask="(99) 99999-9999"
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="birthDate">Data de Nascimento</label>
-              <InputText
-                id="birthDate"
-                value={selectedProfile.birthDate}
-                onChange={(e) =>
-                  setSelectedProfile({
-                    ...selectedProfile,
-                    birthDate: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="motherName">Nome da Mãe</label>
-              <InputText
-                id="motherName"
-                value={selectedProfile.motherName}
-                onChange={(e) =>
-                  setSelectedProfile({
-                    ...selectedProfile,
-                    motherName: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="fatherName">Nome do Pai</label>
-              <InputText
-                id="fatherName"
-                value={selectedProfile.fatherName}
-                onChange={(e) =>
-                  setSelectedProfile({
-                    ...selectedProfile,
-                    fatherName: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="address">Endereço</label>
-              {selectedProfile.address.map((addr) => (
-                <div key={addr.id} className="p-fluid">
+            <div className="p-grid">
+              {/* Coluna 1: Dados Pessoais */}
+              <div className="p-col-12 p-md-6">
+                <div className="field">
+                  <label htmlFor="name">Nome</label>
                   <InputText
-                    value={addr.street}
+                    id="name"
+                    value={selectedProfile.user.name}
                     onChange={(e) =>
                       setSelectedProfile({
                         ...selectedProfile,
-                        address: selectedProfile.address.map((a) =>
-                          a.id === addr.id
-                            ? { ...a, street: e.target.value }
-                            : a
-                        ),
-                      })
-                    }
-                  />
-                  <InputText
-                    value={addr.number}
-                    onChange={(e) =>
-                      setSelectedProfile({
-                        ...selectedProfile,
-                        address: selectedProfile.address.map((a) =>
-                          a.id === addr.id
-                            ? { ...a, number: e.target.value }
-                            : a
-                        ),
-                      })
-                    }
-                  />
-                  <InputText
-                    value={addr.complement}
-                    onChange={(e) =>
-                      setSelectedProfile({
-                        ...selectedProfile,
-                        address: selectedProfile.address.map((a) =>
-                          a.id === addr.id
-                            ? { ...a, complement: e.target.value }
-                            : a
-                        ),
-                      })
-                    }
-                  />
-                  <InputText
-                    value={addr.district}
-                    onChange={(e) =>
-                      setSelectedProfile({
-                        ...selectedProfile,
-                        address: selectedProfile.address.map((a) =>
-                          a.id === addr.id
-                            ? { ...a, district: e.target.value }
-                            : a
-                        ),
-                      })
-                    }
-                  />
-                  <InputText
-                    value={addr.city}
-                    onChange={(e) =>
-                      setSelectedProfile({
-                        ...selectedProfile,
-                        address: selectedProfile.address.map((a) =>
-                          a.id === addr.id ? { ...a, city: e.target.value } : a
-                        ),
-                      })
-                    }
-                  />
-                  <InputText
-                    value={addr.uf}
-                    onChange={(e) =>
-                      setSelectedProfile({
-                        ...selectedProfile,
-                        address: selectedProfile.address.map((a) =>
-                          a.id === addr.id ? { ...a, uf: e.target.value } : a
-                        ),
+                        user: { ...selectedProfile.user, name: e.target.value },
                       })
                     }
                   />
                 </div>
-              ))}
+                <div className="field">
+                  <label htmlFor="email">Email</label>
+                  <InputText
+                    id="email"
+                    value={selectedProfile.user.email}
+                    onChange={(e) =>
+                      setSelectedProfile({
+                        ...selectedProfile,
+                        user: {
+                          ...selectedProfile.user,
+                          email: e.target.value,
+                        },
+                      })
+                    }
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="cpf">CPF</label>
+                  <InputMask
+                    id="cpf"
+                    value={selectedProfile.cpf}
+                    onChange={(e) =>
+                      setSelectedProfile({
+                        ...selectedProfile,
+                        cpf: e.value ?? "",
+                      })
+                    }
+                    mask="999.999.999-99"
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="phone">Telefone</label>
+                  <InputMask
+                    id="phone"
+                    value={selectedProfile.phone}
+                    onChange={(e) =>
+                      setSelectedProfile({
+                        ...selectedProfile,
+                        phone: e.value ?? "",
+                      })
+                    }
+                    mask="(99) 99999-9999"
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="birthDate">Data de Nascimento</label>
+                  <InputText
+                    id="birthDate"
+                    value={selectedProfile.birthDate}
+                    onChange={(e) =>
+                      setSelectedProfile({
+                        ...selectedProfile,
+                        birthDate: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="motherName">Nome da Mãe</label>
+                  <InputText
+                    id="motherName"
+                    value={selectedProfile.motherName}
+                    onChange={(e) =>
+                      setSelectedProfile({
+                        ...selectedProfile,
+                        motherName: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="fatherName">Nome do Pai</label>
+                  <InputText
+                    id="fatherName"
+                    value={selectedProfile.fatherName}
+                    onChange={(e) =>
+                      setSelectedProfile({
+                        ...selectedProfile,
+                        fatherName: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+
+              {/* Coluna 2: Endereço */}
+              <div className="p-col-12 p-md-6">
+                <div className="field">
+                  <label htmlFor="address">Endereço</label>
+                  {selectedProfile.address.map((addr) => (
+                    <div key={addr.id} className="p-fluid">
+                      <div className="field">
+                        <label htmlFor="street">Rua</label>
+                        <InputText
+                          value={addr.street}
+                          onChange={(e) =>
+                            setSelectedProfile({
+                              ...selectedProfile,
+                              address: selectedProfile.address.map((a) =>
+                                a.id === addr.id
+                                  ? { ...a, street: e.target.value }
+                                  : a
+                              ),
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="field">
+                        <label htmlFor="number">Número</label>
+                        <InputText
+                          value={addr.number}
+                          onChange={(e) =>
+                            setSelectedProfile({
+                              ...selectedProfile,
+                              address: selectedProfile.address.map((a) =>
+                                a.id === addr.id
+                                  ? { ...a, number: e.target.value }
+                                  : a
+                              ),
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="field">
+                        <label htmlFor="complement">Complemento</label>
+                        <InputText
+                          value={addr.complement}
+                          onChange={(e) =>
+                            setSelectedProfile({
+                              ...selectedProfile,
+                              address: selectedProfile.address.map((a) =>
+                                a.id === addr.id
+                                  ? { ...a, complement: e.target.value }
+                                  : a
+                              ),
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="field">
+                        <label htmlFor="district">Bairro</label>
+                        <InputText
+                          value={addr.district}
+                          onChange={(e) =>
+                            setSelectedProfile({
+                              ...selectedProfile,
+                              address: selectedProfile.address.map((a) =>
+                                a.id === addr.id
+                                  ? { ...a, district: e.target.value }
+                                  : a
+                              ),
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="field">
+                        <label htmlFor="city">Cidade</label>
+                        <InputText
+                          value={addr.city}
+                          onChange={(e) =>
+                            setSelectedProfile({
+                              ...selectedProfile,
+                              address: selectedProfile.address.map((a) =>
+                                a.id === addr.id
+                                  ? { ...a, city: e.target.value }
+                                  : a
+                              ),
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="field">
+                        <label htmlFor="uf">UF</label>
+                        <InputText
+                          value={addr.uf}
+                          onChange={(e) =>
+                            setSelectedProfile({
+                              ...selectedProfile,
+                              address: selectedProfile.address.map((a) =>
+                                a.id === addr.id
+                                  ? { ...a, uf: e.target.value }
+                                  : a
+                              ),
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
+
+            {/* Botão Salvar */}
             <div className="field">
               <Button label="Salvar" icon="pi pi-check" onClick={handleSave} />
             </div>
