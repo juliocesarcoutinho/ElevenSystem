@@ -50,13 +50,13 @@ public class EmailService {
 
             mailSender.send(message);
         } catch (SendFailedException e) {
-            System.err.println(String.format("Erro ao enviar e-mail: %s", e.getMessage()));
+            System.err.printf("Erro ao enviar e-mail: %s%n", e.getMessage());
             if (e.getNextException() instanceof jakarta.mail.internet.AddressException) {
-                System.err.println(String.format("Endereço de e-mail inválido: %s", e.getNextException().getMessage()));
+                System.err.printf("Endereço de e-mail inválido: %s%n", e.getNextException().getMessage());
             }
             throw e;
         } catch (MessagingException e) {
-            System.err.println(String.format("Erro de mensagem: %s", e.getMessage()));
+            System.err.printf("Erro de mensagem: %s%n", e.getMessage());
             throw e;
         }
     }
@@ -81,7 +81,7 @@ public class EmailService {
 
             mailSender.send(message);
         } catch (MessagingException e) {
-            System.err.println(String.format("Erro de mensagem: %s", e.getMessage()));
+            System.err.printf("Erro de mensagem: %s%n", e.getMessage());
             throw e;
         }
     }

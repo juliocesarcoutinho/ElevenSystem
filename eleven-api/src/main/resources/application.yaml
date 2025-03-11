@@ -11,7 +11,7 @@ spring:
   mail:
     host: ${EMAIL_HOST:smtp.titan.email}
     port: ${EMAIL_PORT:465}
-    username: ${USER_NAMA:contato@toponesystem.com.br}
+    username: ${USER_NAME:contato@toponesystem.com.br}
     password: Topone147258#
     properties:
       mail:
@@ -21,9 +21,9 @@ spring:
             enable: false
           ssl:
             enable: true
-          connectiontimeout: 5000
+          connection timeout: 5000
           timeout: 5000
-          writetimeout: 5000
+          write timeout: 5000
     debug: true
     
 security:

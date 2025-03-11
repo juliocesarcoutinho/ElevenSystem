@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
-import { CheckboxChangeEvent } from "primereact/checkbox";
 import { InputMask, InputMaskChangeEvent } from "primereact/inputmask";
 import { Password } from "primereact/password";
 import { Toast } from "primereact/toast";
@@ -97,20 +96,6 @@ const CadastroUsuario = () => {
     setShowExitButton(false);
   };
 
-  const handleAtivoChange = (e: CheckboxChangeEvent) => {
-    setActive(e.checked ?? false);
-    if (e.checked) {
-      setInativo(false);
-    }
-  };
-
-  const handleInativoChange = (e: CheckboxChangeEvent) => {
-    setInativo(e.checked ?? false);
-    if (e.checked) {
-      setActive(false);
-    }
-  };
-
   const SalvarUsuario = async () => {
     if (validarCamposObrigatorios()) {
       return;
@@ -190,7 +175,7 @@ const CadastroUsuario = () => {
           <Button
             type="button"
             severity="info"
-            label="Cadastrar Usuário"
+            label="Novo"
             icon="pi pi-user-plus"
             onClick={() => {
               setShowForm(true);
@@ -201,7 +186,7 @@ const CadastroUsuario = () => {
             <Button
               type="button"
               severity="danger"
-              label="Fechar Cadastro"
+              label="Fechar"
               icon="pi pi-times"
               onClick={handleExitClick}
               className="ml-2"
@@ -269,6 +254,7 @@ const CadastroUsuario = () => {
                   required
                   placeholder="Digite a senha"
                   feedback={false}
+                  toggleMask
                 />
                 {validationError.password && (
                   <small className="p-error">A senha é obrigatória</small>

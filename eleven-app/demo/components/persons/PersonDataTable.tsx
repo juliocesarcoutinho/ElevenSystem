@@ -9,7 +9,7 @@ import { InputMask } from "primereact/inputmask";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import "primeflex/primeflex.css";
-import { UserProfileService } from "@/demo/services/usuario/UserProfileService"; // Importação do PrimeFlex
+import { UserProfileService } from "@/demo/services/usuario/UserProfileService";
 
 interface Address {
   id: number;
@@ -35,7 +35,7 @@ interface UserWithProfile {
   phone: string | null;
   motherName: string | null;
   fatherName: string | null;
-  addresses: Address[] | null; // Lista de endereços (pode ser null)
+  addresses: Address[] | null | undefined;
 }
 
 const PersonDataTable = () => {
@@ -48,12 +48,14 @@ const PersonDataTable = () => {
   );
   const [visibleDialog, setVisibleDialog] = useState(false);
   const toast = useRef<Toast>(null);
+  const [showform, setShowform] = useState(false);
 
   useEffect(() => {
     const fetchUsersWithProfiles = async () => {
       try {
         setLoading(true);
-        const users = await UserProfileService.getUsersWithProfiles();
+        const users: UserWithProfile[] =
+          await UserProfileService.getUsersWithProfiles();
         setUsersWithProfiles(users);
       } catch (error) {
         console.error("Erro ao buscar usuários com perfis:", error);
@@ -133,7 +135,7 @@ const PersonDataTable = () => {
         paginator
         rows={10}
         rowsPerPageOptions={[5, 10, 25, 50]}
-        onRowClick={(e) => handleRowClick(e.data)}
+        onRowClick={(e) => handleRowClick(e.data as UserWithProfile)}
         selectionMode="single"
       >
         <Column field="id" header="ID" sortable />
@@ -142,12 +144,12 @@ const PersonDataTable = () => {
         <Column
           field="cpf"
           header="CPF"
-          body={(rowData) => rowData.cpf || "Não informado"}
+          body={(rowData: UserWithProfile) => rowData.cpf || "Não informado"}
         />
         <Column
           field="phone"
           header="Telefone"
-          body={(rowData) => rowData.phone || "Não informado"}
+          body={(rowData: UserWithProfile) => rowData.phone || "Não informado"}
         />
       </DataTable>
 
@@ -260,7 +262,6 @@ const PersonDataTable = () => {
               {/* Coluna 2: Endereço */}
               <div className="field col-12 md:col-6">
                 <div className="field">
-                  <label htmlFor="address">Endereço</label>
                   {selectedUser.addresses?.map((addr) => (
                     <div key={addr.id} className="p-fluid">
                       <div className="field">
@@ -365,7 +366,6 @@ const PersonDataTable = () => {
                         <label htmlFor="uf">UF</label>
                         <InputText
                           value={addr.uf}
-                          yarn
                           onChange={(e) =>
                             setSelectedUser({
                               ...selectedUser,

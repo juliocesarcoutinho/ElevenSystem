@@ -113,6 +113,7 @@ const LoginPage = () => {
           life: 3000,
         });
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // Exibe uma mensagem de erro genérica no toast
       toast.current?.show({
