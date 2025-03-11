@@ -70,4 +70,9 @@ export const UserProfileService = {
       throw error; // Lança o erro para ser tratado no componente
     }
   },
+
+  // Metodo para inserir novo usuario
+  async save(user: UserWithProfile): Promise<void> {
+    console.log(user);
+  },
 };
