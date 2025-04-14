@@ -28,16 +28,33 @@ interface SidebarProps {
   onToggle: () => void;
 }
 
+interface MenuDivider {
+  type: 'divider';
+}
+
+interface MenuLink {
+  type?: never;
+  text: string;
+  icon: React.ReactNode;
+  path?: string;
+  isLogout?: boolean;
+  color?: string;
+}
+
+type MenuItem = MenuLink | MenuDivider;
+
 export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const router = useRouter();
 
-  const menuItems = [
+  const menuItems: MenuItem[] = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/pages/dashboard' },
     { text: 'Mensagens', icon: <MessageIcon />, path: '/pages/mensagens' },
     { text: 'Eventos', icon: <EventIcon />, path: '/pages/eventos' },
     { text: 'Pedidos de Oração', icon: <PrayerIcon />, path: '/pages/oracoes' },
     { text: 'Chat', icon: <ChatIcon />, path: '/pages/chat' },
     { text: 'Usuários', icon: <PeopleIcon />, path: '/pages/usuarios' },
+    { type: 'divider' },
+    { text: 'Sair', icon: <LogoutIcon />, isLogout: true, color: '#FFD700' }
   ];
 
   const handleLogout = () => {
@@ -69,8 +86,11 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          padding: '16px 8px',
-          minHeight: isOpen ? 100 : 60,
+          padding: isOpen ? '8px' : '4px',
+          minHeight: 64,
+          '& .MuiIconButton-root': {
+            padding: isOpen ? '8px' : '4px',
+          }
         }}
       >
         <Box
@@ -79,24 +99,22 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
             width: '100%',
             justifyContent: isOpen ? 'space-between' : 'center',
             alignItems: 'center',
-            mb: isOpen ? 2 : 0,
           }}
         >
-          {isOpen ? (
+          {isOpen && (
             <Typography
               variant="h6"
               sx={{
                 color: '#FFD700',
                 fontWeight: 'bold',
                 fontSize: '1.2rem',
-                lineHeight: 1.2,
                 textAlign: 'center',
                 flex: 1,
               }}
             >
-              Eleven<br />Juventude
+              Eleven
             </Typography>
-          ) : null}
+          )}
           <IconButton
             onClick={onToggle}
             sx={{
@@ -113,75 +131,51 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
       <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.12)' }} />
 
-      <List sx={{ flexGrow: 1, pt: 1 }}>
-        {menuItems.map((item) => (
-          <ListItem
-            key={item.text}
-            onClick={() => router.push(item.path)}
-            sx={{
-              minHeight: 48,
-              justifyContent: isOpen ? 'initial' : 'center',
-              px: 2.5,
-              cursor: 'pointer',
-              '&:hover': {
-                backgroundColor: 'rgba(255, 215, 0, 0.08)',
-              },
-            }}
-          >
-            <ListItemIcon
+      <List sx={{ pt: 1 }}>
+        {menuItems.map((item, index) => (
+          'type' in item && item.type === 'divider' ? (
+            <Divider 
+              key={`divider-${index}`} 
+              sx={{ 
+                my: 1,
+                borderColor: 'rgba(255, 255, 255, 0.12)' 
+              }} 
+            />
+          ) : (
+            <ListItem
+              key={item.text}
+              onClick={item.isLogout ? handleLogout : () => item.path && router.push(item.path)}
               sx={{
-                minWidth: 0,
-                mr: isOpen ? 2 : 'auto',
-                justifyContent: 'center',
-                color: 'white',
+                minHeight: 48,
+                justifyContent: isOpen ? 'initial' : 'center',
+                px: 2.5,
+                cursor: 'pointer',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 215, 0, 0.08)',
+                },
               }}
             >
-              {item.icon}
-            </ListItemIcon>
-            <ListItemText
-              primary={item.text}
-              sx={{
-                opacity: isOpen ? 1 : 0,
-                color: 'white',
-              }}
-            />
-          </ListItem>
+              <ListItemIcon
+                sx={{
+                  minWidth: 0,
+                  mr: isOpen ? 2 : 'auto',
+                  justifyContent: 'center',
+                  color: item.color || 'white',
+                }}
+              >
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText
+                primary={item.text}
+                sx={{
+                  opacity: isOpen ? 1 : 0,
+                  color: item.color || 'white',
+                  m: 0,
+                }}
+              />
+            </ListItem>
+          )
         ))}
-      </List>
-
-      <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.12)' }} />
-
-      <List>
-        <ListItem
-          onClick={handleLogout}
-          sx={{
-            minHeight: 48,
-            justifyContent: isOpen ? 'initial' : 'center',
-            px: 2.5,
-            cursor: 'pointer',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 215, 0, 0.08)',
-            },
-          }}
-        >
-          <ListItemIcon
-            sx={{
-              minWidth: 0,
-              mr: isOpen ? 2 : 'auto',
-              justifyContent: 'center',
-              color: '#FFD700',
-            }}
-          >
-            <LogoutIcon />
-          </ListItemIcon>
-          <ListItemText
-            primary="Sair"
-            sx={{
-              opacity: isOpen ? 1 : 0,
-              color: '#FFD700',
-            }}
-          />
-        </ListItem>
       </List>
     </Drawer>
   );
