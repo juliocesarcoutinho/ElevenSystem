@@ -39,12 +39,25 @@ const StyledTextField = styled(TextField)({
   '& .MuiInputLabel-root': {
     color: 'rgba(255, 255, 255, 0.7)',
   },
+  '& .Mui-error .MuiOutlinedInput-notchedOutline': {
+    borderColor: '#ff4444',
+  },
+  '& .Mui-error.MuiFormLabel-root': {
+    color: '#ff4444',
+  },
+  '& .MuiFormHelperText-root': {
+    color: '#ff4444',
+  },
   marginBottom: '1.5rem',
 });
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState({
+    email: '',
+    password: ''
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [snackbar, setSnackbar] = useState({ 
@@ -54,8 +67,34 @@ export default function LoginPage() {
   });
   const router = useRouter();
 
+  const validateFields = () => {
+    const newErrors = {
+      email: '',
+      password: ''
+    };
+    let isValid = true;
+
+    if (!email.trim()) {
+      newErrors.email = 'O email é obrigatório';
+      isValid = false;
+    }
+
+    if (!password.trim()) {
+      newErrors.password = 'A senha é obrigatória';
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
+    
+    if (!validateFields()) {
+      return;
+    }
+
     setIsLoading(true);
     
     try {
@@ -171,7 +210,14 @@ export default function LoginPage() {
               fullWidth
               placeholder="Endereço de email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (errors.email) {
+                  setErrors({ ...errors, email: '' });
+                }
+              }}
+              error={!!errors.email}
+              helperText={errors.email}
             />
 
             <Typography variant="h6" mb={1} color="#fff">
@@ -182,7 +228,14 @@ export default function LoginPage() {
               type="password"
               placeholder="Senha"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (errors.password) {
+                  setErrors({ ...errors, password: '' });
+                }
+              }}
+              error={!!errors.password}
+              helperText={errors.password}
             />
 
             <Box textAlign="center" mb={3}>

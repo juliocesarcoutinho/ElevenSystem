@@ -27,6 +27,16 @@ type ApiErrorResponse = {
   };
 };
 
+const errorMessages: { [key: string]: string } = {
+  'invalid_credentials': 'Email ou senha inválidos',
+  'Invalid credentials': 'Email ou senha inválidos',
+  'invalid_grant': 'Email ou senha inválidos',
+  'invalid_request': 'Requisição inválida',
+  'server_error': 'Erro no servidor',
+  'unauthorized_client': 'Cliente não autorizado',
+  'Token not found in response': 'Erro ao processar resposta do servidor',
+};
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 const api = axios.create({
@@ -71,18 +81,19 @@ export const LoginService = {
       const err = error as ApiErrorResponse;
       
       if (err.response) {
-        if (err.response.status === 400) {
+        const errorKey = (err.response.data.error || err.response.data.message || '') as string;
+        if (err.response.status === 400 || err.response.status === 401) {
           return {
             success: false,
-            message: err.response.data.error || "Credenciais inválidas",
+            message: errorMessages[errorKey] || 'Email ou senha inválidos',
           };
         }
         return {
           success: false,
-          message: err.response.data.message || "Erro inesperado no servidor",
+          message: errorMessages[errorKey] || 'Ocorreu um erro inesperado',
         };
       }
-      return { success: false, message: "Erro inesperado na conexão" };
+      return { success: false, message: "Erro de conexão. Verifique sua internet." };
     }
   },
 
