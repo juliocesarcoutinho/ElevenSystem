@@ -17,6 +17,7 @@ import {
   Alert
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { LoginService } from '@/services/LoginService';
 
 const StyledTextField = styled(TextField)({
   '& .MuiOutlinedInput-root': {
@@ -46,27 +47,41 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [snackbar, setSnackbar] = useState({ 
+    open: false, 
+    message: '', 
+    severity: 'success' as 'success' | 'error'
+  });
   const router = useRouter();
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    
     try {
-      const client_id = "myclientid";
-      const client_secret = "myclientsecret";
+      const client_id = process.env.NEXT_PUBLIC_CLIENT_ID || "myclientid";
+      const client_secret = process.env.NEXT_PUBLIC_CLIENT_SECRET || "myclientsecret";
       
-      // Simular chamada de login
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Aqui você implementaria sua lógica de login real
-      console.log('Login attempt:', { email, password, client_id, client_secret });
-      
-      router.push('/pages/dashboard');
+      const response = await LoginService.login(
+        email,
+        password,
+        client_id,
+        client_secret
+      );
+
+      if (response.success) {
+        router.push('/pages/dashboard');
+      } else {
+        setSnackbar({
+          open: true,
+          message: response.message || 'Erro ao realizar login',
+          severity: 'error'
+        });
+      }
     } catch {
       setSnackbar({
         open: true,
-        message: 'Erro ao realizar login',
+        message: 'Erro inesperado ao tentar fazer login',
         severity: 'error'
       });
     } finally {
@@ -77,7 +92,7 @@ export default function LoginPage() {
   const handleRecoveryPassword = async () => {
     setIsLoading(true);
     try {
-      // Simular envio de email
+      
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       setSnackbar({
@@ -255,17 +270,28 @@ export default function LoginPage() {
 
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={6000}
+        autoHideDuration={4000}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
+        sx={{
+          marginTop: '20px',
+          '& .MuiPaper-root': {
+            backgroundColor: '#242424',
+          }
+        }}
       >
         <Alert 
-          severity={snackbar.severity as 'success' | 'error'} 
+          severity={snackbar.severity}
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
           sx={{ 
             width: '100%',
-            backgroundColor: '#242424',
+            backgroundColor: snackbar.severity === 'error' ? '#ff44447a' : '#4caf507a',
             color: '#fff',
             '.MuiAlert-icon': {
-              color: snackbar.severity === 'success' ? '#FFD700' : '#ff4444'
+              color: snackbar.severity === 'error' ? '#ff4444' : '#4caf50'
+            },
+            '.MuiAlert-action': {
+              color: '#fff'
             }
           }}
         >
