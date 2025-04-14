@@ -30,7 +30,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           transition: 'width 225ms cubic-bezier(0.4, 0, 0.6, 1) 0ms',
         }}
       >
-        <Navbar />
+        <Navbar isSidebarOpen={isSidebarOpen} />
         <Box
           component="div"
           sx={{

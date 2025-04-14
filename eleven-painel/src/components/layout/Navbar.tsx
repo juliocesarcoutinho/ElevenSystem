@@ -9,7 +9,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { LoginService } from '@/services/LoginService';
 
-export function Navbar() {
+interface NavbarProps {
+  isSidebarOpen: boolean;
+}
+
+export function Navbar({ isSidebarOpen }: NavbarProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [notificationAnchorEl, setNotificationAnchorEl] = useState<null | HTMLElement>(null);
   const router = useRouter();
@@ -42,17 +46,20 @@ export function Navbar() {
       }}
     >
       <Toolbar sx={{ px: 3, minHeight: 64 }}>
-        <Typography
-          variant="h6"
-          component="div"
-          sx={{
-            flexGrow: 1,
-            color: '#FFD700',
-            fontWeight: 'bold',
-          }}
-        >
-          Eleven Juventude
-        </Typography>
+        {!isSidebarOpen && (
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{
+              flexGrow: 1,
+              color: '#FFD700',
+              fontWeight: 'bold',
+            }}
+          >
+            Eleven Juventude
+          </Typography>
+        )}
+        <Box sx={{ flexGrow: 1 }} />
 
         <Box>
           <IconButton

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   Box,
   Drawer,
@@ -7,8 +6,8 @@ import {
   ListItemIcon,
   ListItemText,
   IconButton,
-  Typography,
   Divider,
+  Typography,
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -19,27 +18,32 @@ import {
   People as PeopleIcon,
   Menu as MenuIcon,
   ChevronLeft as ChevronLeftIcon,
+  ExitToApp as LogoutIcon,
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
+import { LoginService } from '@/services/LoginService';
 
 interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
 }
 
-const drawerWidth = 240;
-
 export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const router = useRouter();
 
   const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-    { text: 'Mensagens', icon: <MessageIcon />, path: '/mensagens' },
-    { text: 'Eventos', icon: <EventIcon />, path: '/eventos' },
-    { text: 'Pedidos de Oração', icon: <PrayerIcon />, path: '/oracoes' },
-    { text: 'Chat', icon: <ChatIcon />, path: '/chat' },
-    { text: 'Usuários', icon: <PeopleIcon />, path: '/usuarios' },
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/pages/dashboard' },
+    { text: 'Mensagens', icon: <MessageIcon />, path: '/pages/mensagens' },
+    { text: 'Eventos', icon: <EventIcon />, path: '/pages/eventos' },
+    { text: 'Pedidos de Oração', icon: <PrayerIcon />, path: '/pages/oracoes' },
+    { text: 'Chat', icon: <ChatIcon />, path: '/pages/chat' },
+    { text: 'Usuários', icon: <PeopleIcon />, path: '/pages/usuarios' },
   ];
+
+  const handleLogout = () => {
+    LoginService.logout();
+    router.push('/');
+  };
 
   return (
     <Drawer
@@ -55,32 +59,61 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
           borderRight: '1px solid rgba(255, 255, 255, 0.12)',
           transition: 'width 225ms cubic-bezier(0.4, 0, 0.6, 1) 0ms',
           overflowX: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
         },
       }}
     >
       <Box
         sx={{
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: isOpen ? 'flex-end' : 'center',
-          padding: '8px',
+          padding: '16px 8px',
+          minHeight: isOpen ? 100 : 60,
         }}
       >
-        <IconButton
-          onClick={onToggle}
+        <Box
           sx={{
-            color: 'white',
-            cursor: 'pointer',
-            '&:hover': {
-              color: '#FFD700',
-            },
+            display: 'flex',
+            width: '100%',
+            justifyContent: isOpen ? 'space-between' : 'center',
+            alignItems: 'center',
+            mb: isOpen ? 2 : 0,
           }}
         >
-          {isOpen ? <ChevronLeftIcon /> : <MenuIcon />}
-        </IconButton>
+          {isOpen ? (
+            <Typography
+              variant="h6"
+              sx={{
+                color: '#FFD700',
+                fontWeight: 'bold',
+                fontSize: '1.2rem',
+                lineHeight: 1.2,
+                textAlign: 'center',
+                flex: 1,
+              }}
+            >
+              Eleven<br />Juventude
+            </Typography>
+          ) : null}
+          <IconButton
+            onClick={onToggle}
+            sx={{
+              color: 'white',
+              '&:hover': {
+                color: '#FFD700',
+              },
+            }}
+          >
+            {isOpen ? <ChevronLeftIcon /> : <MenuIcon />}
+          </IconButton>
+        </Box>
       </Box>
 
-      <List>
+      <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.12)' }} />
+
+      <List sx={{ flexGrow: 1, pt: 1 }}>
         {menuItems.map((item) => (
           <ListItem
             key={item.text}
@@ -114,6 +147,41 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
             />
           </ListItem>
         ))}
+      </List>
+
+      <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.12)' }} />
+
+      <List>
+        <ListItem
+          onClick={handleLogout}
+          sx={{
+            minHeight: 48,
+            justifyContent: isOpen ? 'initial' : 'center',
+            px: 2.5,
+            cursor: 'pointer',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 215, 0, 0.08)',
+            },
+          }}
+        >
+          <ListItemIcon
+            sx={{
+              minWidth: 0,
+              mr: isOpen ? 2 : 'auto',
+              justifyContent: 'center',
+              color: '#FFD700',
+            }}
+          >
+            <LogoutIcon />
+          </ListItemIcon>
+          <ListItemText
+            primary="Sair"
+            sx={{
+              opacity: isOpen ? 1 : 0,
+              color: '#FFD700',
+            }}
+          />
+        </ListItem>
       </List>
     </Drawer>
   );
