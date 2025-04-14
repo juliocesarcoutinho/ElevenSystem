@@ -109,7 +109,7 @@ export default function LoginPage() {
       );
 
       if (response.success) {
-        router.push('/pages/dashboard');
+        router.push('/dashboard');
       } else {
         setSnackbar({
           open: true,
