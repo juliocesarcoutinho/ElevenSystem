@@ -5,7 +5,18 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { UsersTable } from '@/components/users/UsersTable';
 import { UserForm } from '@/components/users/UserForm';
 import { UserService, User, UserFormData } from '@/services/UserService';
-import { Box, Button, Typography, Alert, CircularProgress } from '@mui/material';
+import { 
+  Box, 
+  Button, 
+  Typography, 
+  Alert, 
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle
+} from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 
 export default function UsuariosPage() {
@@ -16,6 +27,9 @@ export default function UsuariosPage() {
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const loadUsers = async () => {
     try {
@@ -57,8 +71,44 @@ export default function UsuariosPage() {
   };
   
   const handleDeleteUser = (userId: number) => {
-    console.log('Excluir usuário:', userId);
-    // Implementar lógica de exclusão
+    setUserToDelete(userId);
+    setDeleteConfirmOpen(true);
+  };
+  
+  const confirmDelete = async () => {
+    if (userToDelete === null) return;
+    
+    try {
+      setIsDeleting(true);
+      await UserService.deleteUser(userToDelete);
+      
+      // Remove o usuário da lista local para atualização imediata da UI
+      setUsers(prevUsers => prevUsers.filter(user => user.id !== userToDelete));
+      setTotalElements(prev => prev - 1);
+      
+      // Fecha o diálogo de confirmação
+      setDeleteConfirmOpen(false);
+      setUserToDelete(null);
+      
+      // Se a página atual ficar vazia após a exclusão e não for a primeira página, 
+      // volta para a página anterior
+      if (users.length === 1 && page > 0) {
+        setPage(page - 1);
+      } else {
+        // Senão, apenas recarrega os dados
+        await loadUsers();
+      }
+    } catch (error) {
+      console.error('Erro ao excluir usuário:', error);
+      setError('Erro ao excluir usuário. Por favor, tente novamente.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+  
+  const cancelDelete = () => {
+    setDeleteConfirmOpen(false);
+    setUserToDelete(null);
   };
   
   return (
@@ -120,6 +170,40 @@ export default function UsuariosPage() {
             onDelete={handleDeleteUser}
           />
         )}
+        
+        {/* Diálogo de confirmação de exclusão */}
+        <Dialog
+          open={deleteConfirmOpen}
+          onClose={cancelDelete}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            {"Confirmar exclusão"}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button 
+              onClick={cancelDelete} 
+              color="primary"
+              disabled={isDeleting}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              onClick={confirmDelete} 
+              color="error" 
+              autoFocus
+              disabled={isDeleting}
+            >
+              {isDeleting ? <CircularProgress size={24} /> : "Excluir"}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </DashboardLayout>
   );

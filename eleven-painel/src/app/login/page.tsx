@@ -1,4 +1,3 @@
-'use client';
 import { Box, Button, Container, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 import { LoginService } from '@/services/LoginService';
@@ -15,8 +14,8 @@ export default function LoginPage() {
     const result = await LoginService.login(
       username, 
       password,
-      'eleven-frontend',
-      'eleven-secret'
+      'eleven-frontend', // client_id (ajuste conforme sua aplicação)
+      'eleven-secret'    // client_secret (ajuste conforme sua aplicação)
     );
     
     if (result.success) {
