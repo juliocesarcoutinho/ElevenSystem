@@ -63,6 +63,7 @@ export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
   
   const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
   const [isLoadingRoles, setIsLoadingRoles] = useState(false);
+  const [selectOpen, setSelectOpen] = useState(false);
   const isEditMode = !!editingUser;
 
   // Carregar os perfis de acesso quando o componente é montado
@@ -168,7 +169,7 @@ export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
       case 'OPERADOR':
         return 'Operador';
       default:
-        return authority; // Retorna o próprio valor se não tiver mapeamento
+        return authority;
     }
   };
 
@@ -253,8 +254,11 @@ export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
               <StyledSelect
                 labelId="roles-label"
                 multiple
+                open={selectOpen}
+                onOpen={() => setSelectOpen(true)}
+                onClose={() => setSelectOpen(false)}
                 value={formData.roles.map(role => role.id)}
-                onChange={(e) => {
+                onChange={(e, child) => {
                   const selectedIds = e.target.value as number[];
                   const selectedRoles = availableRoles.filter(role => 
                     selectedIds.includes(role.id)
@@ -267,9 +271,26 @@ export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
                   } else if (selectedRoles.length === 0) {
                     setErrors(prev => ({ ...prev, roles: 'Selecione pelo menos um perfil de acesso' }));
                   }
+                  
+                  // Fecha o menu após seleção
+                  setSelectOpen(false);
+                }}
+                renderValue={(selected) => {
+                  // Exibe perfis selecionados em formato de texto
+                  return (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {formData.roles.map((role) => (
+                        <span key={role.id}>{getRoleDisplayName(role.authority)}</span>
+                      )).reduce((prev, curr) => prev === null ? [curr] : [...prev, ', ', curr], null)}
+                    </Box>
+                  );
                 }}
                 label="Perfil de Acesso"
-                MenuProps={menuPaperProps}
+                MenuProps={{
+                  ...menuPaperProps,
+                  // Garante que o menu fecha ao clicar em um item
+                  disableAutoFocusItem: true,
+                }}
                 error={!!errors.roles}
               >
                 {availableRoles.map(role => (
