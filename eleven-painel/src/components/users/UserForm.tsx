@@ -132,7 +132,8 @@ export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      const { confirmPassword: _, role, ...restData } = formData;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { confirmPassword, role, ...restData } = formData;
       
       // Cria o payload com o role dentro de um array roles
       const submitData: UserFormData = {
@@ -142,6 +143,7 @@ export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
       
       // Se estiver em modo de edição e não tiver senha, remove do payloadd
       if (isEditMode && !submitData.password) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password, ...dataWithoutPassword } = submitData;
         onSubmit(dataWithoutPassword);
       } else {

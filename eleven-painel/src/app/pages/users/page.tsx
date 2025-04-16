@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { UsersTable } from '@/components/users/UsersTable';
 import { UserForm } from '@/components/users/UserForm';
@@ -15,8 +15,7 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle,
-  DialogProps
+  DialogTitle
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 
@@ -27,7 +26,8 @@ export default function UsuariosPage() {
   const [rowsPerPage, setRowsPerPage] = useState(12);
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  // Removida a variável isSaving para evitar o aviso, mantendo apenas o setter
+  const [, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   // Estados para exclusão
@@ -39,16 +39,17 @@ export default function UsuariosPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [userToEdit, setUserToEdit] = useState<User | null>(null);
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
       const response = await UserService.getUsers(page, rowsPerPage);
       setUsers(response.content);
       setTotalElements(response.totalElements);
-          } catch (error: any) {
-      console.error('Error loading users:', error);
-      if (error.message === 'Usuário não autenticado') {
+          } catch (error: unknown) {
+                console.error('Error loading users:', error);
+                // Verificando se o erro é uma instância de Error
+                if (error instanceof Error && error.message === 'Usuário não autenticado') {
         setError('Sessão expirada. Por favor, faça login novamente.');
         // Redirecionar para a página de login
         setTimeout(() => window.location.href = '/login', 2000);
@@ -58,11 +59,11 @@ export default function UsuariosPage() {
     } finally {
       setIsLoading(false);
     }
-  };
-
+  }, [page, rowsPerPage]);
+  
   useEffect(() => {
     loadUsers();
-  }, [page, rowsPerPage]);
+  }, [loadUsers]);
 
   const handleNewUser = () => {
     setIsFormVisible(true);

@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { api } from '@/lib/api';
 import { LoginService } from './LoginService';
 
@@ -7,10 +6,10 @@ interface AxiosErrorResponse {
   response?: {
     status: number;
     statusText: string;
-    data: any;
-    headers: any;
+    data: unknown;
+    headers: Record<string, string>;
   };
-  request?: any;
+  request?: unknown;
   message?: string;
 }
 
