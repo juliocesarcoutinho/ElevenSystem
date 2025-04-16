@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Eleven Juventude",
-  description: "Plataforma de gerenciamento de atividades e eventos da Eleven Juventude",
+  description: "Plataforma de gerenciamento de atividades e events da Eleven Juventude",
 };
 
 export default function RootLayout({

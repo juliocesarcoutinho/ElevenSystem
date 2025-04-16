@@ -1,10 +1,10 @@
 'use client';
 
-import { Box, TextField, Typography, Paper, InputAdornment, IconButton, Pagination } from '@mui/material';
+import {Box, IconButton, InputAdornment, Pagination, Paper, TextField, Typography} from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useState } from 'react';
+import {useState} from 'react';
 
 interface User {
   id: number;
@@ -17,14 +17,24 @@ interface User {
 
 interface UsersTableProps {
   users: User[];
+  totalElements: number;
+  page: number;
+  rowsPerPage: number;
   onEdit: (userId: number) => void;
   onDelete: (userId: number) => void;
+  onPageChange: (newPage: number) => void;
+  onRowsPerPageChange: (newRowsPerPage: number) => void;
 }
 
-export function UsersTable({ users, onEdit, onDelete }: UsersTableProps) {
+export function UsersTable({ 
+  users, 
+  totalElements, 
+  page, 
+  rowsPerPage, 
+  onEdit, 
+  onDelete,
+  onPageChange}: UsersTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [page, setPage] = useState(1);
-  const itemsPerPage = 12;
 
   const filteredUsers = users.filter(user =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -137,16 +147,16 @@ export function UsersTable({ users, onEdit, onDelete }: UsersTableProps) {
 
       <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-          Itens por página: {itemsPerPage}
+          Itens por página: {rowsPerPage}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-            {filteredUsers.length > 0 ? `1-${filteredUsers.length} de ${users.length}` : '0-0 de 0'}
+            {filteredUsers.length > 0 ? `${(page * rowsPerPage) - rowsPerPage + 1}-${Math.min(page * rowsPerPage, totalElements)} de ${totalElements}` : '0-0 de 0'}
           </Typography>
           <Pagination
-            count={Math.ceil(users.length / itemsPerPage)}
+            count={Math.ceil(totalElements / rowsPerPage)}
             page={page}
-            onChange={(_, newPage) => setPage(newPage)}
+            onChange={(_, newPage) => onPageChange(newPage)}
             sx={{
               '& .MuiPaginationItem-root': {
                 color: '#FFD700',

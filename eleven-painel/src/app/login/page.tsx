@@ -14,7 +14,7 @@ export default function LoginPage() {
     const result = await AuthService.login(username, password);
     
     if (result.success) {
-      window.location.href = '/usuarios';
+      window.location.href = '/users';
     } else {
       setError(result.message || 'Erro ao fazer login');
     }

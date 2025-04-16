@@ -62,16 +62,25 @@ export default function UsuariosPage() {
   };
 
   const handleFormSubmit = async (data: UserFormData) => {
-    // Aqui você implementará a lógica para salvar o novo usuário
     console.log('Novo usuário:', data);
     setIsFormVisible(false);
-    await loadUsers(); // Recarrega a lista após criar
+    await loadUsers();
   };
 
   const handleFormCancel = () => {
     setIsFormVisible(false);
   };
 
+  const handleEditUser = (userId: number) => {
+    console.log('Editar usuário:', userId);
+    // Implementar lógica de edição
+  };
+  
+  const handleDeleteUser = (userId: number) => {
+    console.log('Excluir usuário:', userId);
+    // Implementar lógica de exclusão
+  };
+  
   return (
     <DashboardLayout>
       <Box sx={{ p: 3 }}>
@@ -127,6 +136,8 @@ export default function UsuariosPage() {
             rowsPerPage={rowsPerPage}
             onPageChange={setPage}
             onRowsPerPageChange={setRowsPerPage}
+            onEdit={handleEditUser}
+            onDelete={handleDeleteUser}
           />
         )}
       </Box>

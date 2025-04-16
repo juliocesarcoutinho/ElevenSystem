@@ -48,11 +48,11 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
   const menuItems: MenuItem[] = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/pages/dashboard' },
-    { text: 'Mensagens', icon: <MessageIcon />, path: '/pages/mensagens' },
-    { text: 'Eventos', icon: <EventIcon />, path: '/pages/eventos' },
-    { text: 'Pedidos de Oração', icon: <PrayerIcon />, path: '/pages/oracoes' },
+    { text: 'Mensagens', icon: <MessageIcon />, path: '/pages/messages' },
+    { text: 'Eventos', icon: <EventIcon />, path: '/pages/events' },
+    { text: 'Pedidos de Oração', icon: <PrayerIcon />, path: '/pages/prayers' },
     { text: 'Chat', icon: <ChatIcon />, path: '/pages/chat' },
-    { text: 'Usuários', icon: <PeopleIcon />, path: '/pages/usuarios' },
+    { text: 'Usuários', icon: <PeopleIcon />, path: '/pages/users' },
     { type: 'divider' },
     { text: 'Sair', icon: <LogoutIcon />, isLogout: true, color: '#FFD700' }
   ];
