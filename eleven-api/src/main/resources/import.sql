@@ -9,10 +9,9 @@ INSERT INTO tb_role (authority) VALUES ('ROLE_OPERATOR');
 INSERT INTO tb_role (authority) VALUES ('ROLE_ADMIN');
 
 -- Inserir dados na tabela tb_user_role
-INSERT INTO tb_user_role (user_id, role_id) VALUES (1, 1); -- Rebekah Brown como OPERATOR
-INSERT INTO tb_user_role (user_id, role_id) VALUES (2, 1); -- Miria Green como OPERATOR
-INSERT INTO tb_user_role (user_id, role_id) VALUES (2, 2); -- Miria Green como ADMIN
-INSERT INTO tb_user_role (user_id, role_id) VALUES (3, 1); -- Julio Coutinho como OPERATOR
+INSERT INTO tb_user_role (user_id, role_id) VALUES (1, 1); -- Rebekah Coutinho como OPERATOR
+INSERT INTO tb_user_role (user_id, role_id) VALUES (2, 2); -- Miria Coutinho como OPERATOR
+INSERT INTO tb_user_role (user_id, role_id) VALUES (3, 2); -- Julio Coutinho como OPERATOR
 INSERT INTO tb_user_role (user_id, role_id) VALUES (4, 1); -- Priscila Coutinho como OPERATOR
 
 -- Inserir dados na tabela tb_user_profile
