@@ -35,6 +35,19 @@ const StyledTextField = styled(TextField)({
       color: '#fff',
       padding: '1rem',
     },
+    '& input:-webkit-autofill': {
+      WebkitBoxShadow: '0 0 0 30px #242424 inset',
+      WebkitTextFillColor: '#fff',
+      caretColor: '#fff',
+    },
+    '& input:-webkit-autofill:hover': {
+      WebkitBoxShadow: '0 0 0 30px #242424 inset',
+      WebkitTextFillColor: '#fff',
+    },
+    '& input:-webkit-autofill:focus': {
+      WebkitBoxShadow: '0 0 0 30px #242424 inset',
+      WebkitTextFillColor: '#fff',
+    },
   },
   '& .MuiInputLabel-root': {
     color: 'rgba(255, 255, 255, 0.7)',

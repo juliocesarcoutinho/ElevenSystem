@@ -10,7 +10,6 @@ import {
   Select,
   MenuItem,
   Typography,
-  FormHelperText,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
@@ -30,17 +29,17 @@ const StyledTextField = styled(TextField)({
       color: '#fff',
     },
     '& input:-webkit-autofill': {
-      '-webkit-box-shadow': '0 0 0 30px #242424 inset',
-      '-webkit-text-fill-color': '#fff',
-      'caret-color': '#fff',
+      WebkitBoxShadow: '0 0 0 30px #242424 inset',
+      WebkitTextFillColor: '#fff',
+      caretColor: '#fff',
     },
     '& input:-webkit-autofill:hover': {
-      '-webkit-box-shadow': '0 0 0 30px #242424 inset',
-      '-webkit-text-fill-color': '#fff',
+      WebkitBoxShadow: '0 0 0 30px #242424 inset',
+      WebkitTextFillColor: '#fff',
     },
     '& input:-webkit-autofill:focus': {
-      '-webkit-box-shadow': '0 0 0 30px #242424 inset',
-      '-webkit-text-fill-color': '#fff',
+      WebkitBoxShadow: '0 0 0 30px #242424 inset',
+      WebkitTextFillColor: '#fff',
     },
   },
   '& .MuiInputLabel-root': {
@@ -147,7 +146,7 @@ export function UserForm({ onSubmit, onCancel }: UserFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validatePasswords()) {
-      const { confirmPassword, ...submitData } = formData;
+      const { confirmPassword: _, ...submitData } = formData;
       onSubmit(submitData);
     }
   };
