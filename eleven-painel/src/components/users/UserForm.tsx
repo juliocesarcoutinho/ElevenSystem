@@ -1,96 +1,23 @@
 import { useState } from 'react';
 import {
   Box,
-  TextField,
   Button,
   FormControlLabel,
-  Switch,
   FormControl,
   InputLabel,
-  Select,
-  MenuItem,
   Typography,
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
 
-const StyledTextField = styled(TextField)({
-  '& .MuiOutlinedInput-root': {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    '& fieldset': {
-      borderColor: 'rgba(255, 255, 255, 0.2)',
-    },
-    '&:hover fieldset': {
-      borderColor: '#FFD700',
-    },
-    '&.Mui-focused fieldset': {
-      borderColor: '#FFD700',
-    },
-    '& input': {
-      color: '#fff',
-    },
-    '& input:-webkit-autofill': {
-      WebkitBoxShadow: '0 0 0 30px #242424 inset',
-      WebkitTextFillColor: '#fff',
-      caretColor: '#fff',
-    },
-    '& input:-webkit-autofill:hover': {
-      WebkitBoxShadow: '0 0 0 30px #242424 inset',
-      WebkitTextFillColor: '#fff',
-    },
-    '& input:-webkit-autofill:focus': {
-      WebkitBoxShadow: '0 0 0 30px #242424 inset',
-      WebkitTextFillColor: '#fff',
-    },
-  },
-  '& .MuiInputLabel-root': {
-    color: 'rgba(255, 255, 255, 0.7)',
-  },
-  '& .Mui-focused .MuiInputLabel-root': {
-    color: '#FFD700',
-  },
-  '& .MuiFormHelperText-root': {
-    color: '#ff4444',
-  },
-});
-
-const StyledSelect = styled(Select)({
-  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-  },
-  '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#FFD700',
-  },
-  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#FFD700',
-  },
-  '& .MuiSelect-select': {
-    color: '#fff',
-  },
-  '& .MuiSvgIcon-root': {
-    color: 'rgba(255, 255, 255, 0.7)',
-  },
-  '& .MuiPaper-root': {
-    backgroundColor: '#242424',
-  },
-  '& .MuiMenu-paper': {
-    backgroundColor: '#242424',
-  },
-});
-
-const StyledMenuItem = styled(MenuItem)({
-  color: '#fff',
-  backgroundColor: '#242424',
-  '&:hover': {
-    backgroundColor: 'rgba(255, 215, 0, 0.1)',
-  },
-  '&.Mui-selected': {
-    backgroundColor: 'rgba(255, 215, 0, 0.2)',
-    '&:hover': {
-      backgroundColor: 'rgba(255, 215, 0, 0.3)',
-    },
-  },
-});
+import {
+  StyledTextField,
+  StyledSelect,
+  StyledMenuItem,
+  StyledSwitch,
+  StyledButton,
+  inputLabelStyles,
+  menuPaperProps,
+  formContainerStyles
+} from '@/styles/components/forms.styles';
 
 interface UserFormData {
   name: string;
@@ -169,14 +96,7 @@ export function UserForm({ onSubmit, onCancel }: UserFormProps) {
     <Box
       component="form"
       onSubmit={handleSubmit}
-      sx={{
-        width: '100%',
-        maxWidth: 1000,
-        mx: 'auto',
-        p: 4,
-        backgroundColor: '#242424',
-        borderRadius: 2,
-      }}
+      sx={formContainerStyles}
     >
       <Typography variant="h5" color="white" gutterBottom sx={{ mb: 4 }}>
         Novo Usuário
@@ -238,12 +158,7 @@ export function UserForm({ onSubmit, onCancel }: UserFormProps) {
           <FormControl fullWidth>
             <InputLabel 
               id="roles-label"
-              sx={{ 
-                color: 'rgba(255, 255, 255, 0.7)',
-                '&.Mui-focused': {
-                  color: '#FFD700',
-                },
-              }}
+              sx={inputLabelStyles}
             >
               Perfil de Acesso
             </InputLabel>
@@ -253,25 +168,7 @@ export function UserForm({ onSubmit, onCancel }: UserFormProps) {
               value={formData.roles}
               onChange={(e) => setFormData({ ...formData, roles: e.target.value as string[] })}
               label="Perfil de Acesso"
-              MenuProps={{
-                PaperProps: {
-                  sx: {
-                    bgcolor: '#242424',
-                    '& .MuiMenuItem-root': {
-                      color: '#fff',
-                      '&:hover': {
-                        bgcolor: 'rgba(255, 215, 0, 0.1)',
-                      },
-                      '&.Mui-selected': {
-                        bgcolor: 'rgba(255, 215, 0, 0.2)',
-                        '&:hover': {
-                          bgcolor: 'rgba(255, 215, 0, 0.3)',
-                        },
-                      },
-                    },
-                  },
-                },
-              }}
+              MenuProps={menuPaperProps}
             >
               <StyledMenuItem value="ADMIN">Administrador</StyledMenuItem>
               <StyledMenuItem value="OPERADOR">Operador</StyledMenuItem>
@@ -282,17 +179,9 @@ export function UserForm({ onSubmit, onCancel }: UserFormProps) {
         <Box sx={{ width: '100%' }}>
           <FormControlLabel
             control={
-              <Switch
+              <StyledSwitch
                 checked={formData.active}
                 onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-                sx={{
-                  '& .MuiSwitch-switchBase.Mui-checked': {
-                    color: '#FFD700',
-                  },
-                  '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                    backgroundColor: '#FFD700',
-                  },
-                }}
               />
             }
             label="Usuário Ativo"
@@ -305,27 +194,14 @@ export function UserForm({ onSubmit, onCancel }: UserFormProps) {
             type="button"
             onClick={onCancel}
             variant="outlined"
-            sx={{
-              color: 'white',
-              borderColor: 'white',
-              '&:hover': {
-                borderColor: '#FFD700',
-                color: '#FFD700',
-              },
-            }}
+            sx={StyledButton.cancel}
           >
             Cancelar
           </Button>
           <Button
             type="submit"
             variant="contained"
-            sx={{
-              backgroundColor: '#FFD700',
-              color: 'black',
-              '&:hover': {
-                backgroundColor: '#FFD700CC',
-              },
-            }}
+            sx={StyledButton.submit}
           >
             Salvar
           </Button>
