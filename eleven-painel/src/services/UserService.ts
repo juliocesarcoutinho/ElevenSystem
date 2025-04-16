@@ -41,9 +41,9 @@ export interface PaginatedResponse {
 export interface UserFormData {
   name: string;
   email: string;
-  password: string;
+  password?: string;
   active: boolean;
-  roles: string[];
+  roles: { id: number, authority: string }[];
 }
 
 export class UserService {
@@ -52,8 +52,12 @@ export class UserService {
       if (!LoginService.isAuthenticated()) {
         throw new Error('Usuário não autenticado');
       }
+      
+      // Ajuste para API: página começa em 0
+      const apiPage = page - 1;
+      
       const { data } = await api.get<PaginatedResponse>('/users', {
-        params: { page, size, sort }
+        params: { page: apiPage, size, sort }
       });
 
       return data;

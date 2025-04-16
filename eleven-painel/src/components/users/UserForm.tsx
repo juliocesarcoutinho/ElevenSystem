@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -6,6 +6,7 @@ import {
   FormControl,
   InputLabel,
   Typography,
+  CircularProgress,
 } from '@mui/material';
 
 import {
@@ -18,11 +19,13 @@ import {
   menuPaperProps,
   formContainerStyles
 } from '@/styles/components/forms.styles';
+import { User } from '@/services/UserService';
+import { Role, RoleService } from '@/services/RoleService';
 
 interface UserFormData {
   name: string;
   email: string;
-  password: string;
+  password?: string;
   active: boolean;
   roles: string[];
 }
@@ -33,62 +36,139 @@ interface FormState {
   password: string;
   confirmPassword: string;
   active: boolean;
-  roles: string[];
+  roles: { id: number, authority: string }[];
 }
 
 interface UserFormProps {
   onSubmit: (data: UserFormData) => void;
   onCancel: () => void;
+  editingUser?: User | null;
 }
 
-export function UserForm({ onSubmit, onCancel }: UserFormProps) {
+export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
   const [formData, setFormData] = useState<FormState>({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
     active: true,
-    roles: ['OPERADOR'],
+    roles: [],
   });
 
   const [errors, setErrors] = useState({
     password: '',
     confirmPassword: '',
+    roles: '',
   });
+  
+  const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
+  const [isLoadingRoles, setIsLoadingRoles] = useState(false);
+  const isEditMode = !!editingUser;
 
-  const validatePasswords = () => {
+  // Carregar os perfis de acesso quando o componente é montado
+  useEffect(() => {
+    const loadRoles = async () => {
+      try {
+        setIsLoadingRoles(true);
+        const roles = await RoleService.getRoles();
+        setAvailableRoles(roles);
+        
+        // Se não estiver em modo de edição, define o perfil padrão como OPERADOR (se existir)
+        if (!isEditMode && roles.length > 0) {
+          const operadorRole = roles.find(role => role.authority === 'OPERADOR');
+          if (operadorRole) {
+            setFormData(prev => ({ ...prev, roles: [operadorRole] }));
+          } else {
+            // Se não encontrar OPERADOR, usa o primeiro perfil disponível
+            setFormData(prev => ({ ...prev, roles: [roles[0]] }));
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar perfis de acesso:', error);
+      } finally {
+        setIsLoadingRoles(false);
+      }
+    };
+    
+    loadRoles();
+  }, [isEditMode]);
+  
+  // Quando o usuário de edição mudar, atualiza o formulário
+  useEffect(() => {
+    if (editingUser) {
+      setFormData({
+        name: editingUser.name,
+        email: editingUser.email,
+        password: '', // Senha vazia na edição
+        confirmPassword: '',
+        active: editingUser.active,
+        roles: editingUser.roles, // Manter os objetos role completos
+      });
+    }
+  }, [editingUser]);
+
+  const validateForm = () => {
     const newErrors = {
       password: '',
       confirmPassword: '',
+      roles: '',
     };
-
-    if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'As senhas não coincidem';
+  
+    // Validação de senhas
+    // Em modo de edição, só validamos as senhas se alguma delas for preenchida
+    if (!(isEditMode && !formData.password && !formData.confirmPassword)) {
+      if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
+        newErrors.confirmPassword = 'As senhas não coincidem';
+      }
     }
-
+    
+    // Validação de perfis
+    if (formData.roles.length === 0) {
+      newErrors.roles = 'Selecione pelo menos um perfil de acesso';
+    }
+  
     setErrors(newErrors);
-    return !newErrors.password && !newErrors.confirmPassword;
+    return !newErrors.password && !newErrors.confirmPassword && !newErrors.roles;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (validatePasswords()) {
+    if (validateForm()) {
       const { confirmPassword: _, ...submitData } = formData;
-      onSubmit(submitData);
+      
+      // Se estiver em modo de edição e não tiver senha, remove do payload
+      if (isEditMode && !submitData.password) {
+        const { password, ...dataWithoutPassword } = submitData;
+        onSubmit(dataWithoutPassword);
+      } else {
+        onSubmit(submitData);
+      }
     }
   };
-
+  
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, password: e.target.value });
     if (formData.confirmPassword) {
-      validatePasswords();
+      validateForm();
     }
   };
-
+  
   const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, confirmPassword: e.target.value });
     if (formData.password) {
-      validatePasswords();
+      validateForm();
+    }
+  };
+
+  // Função auxiliar para obter o nome de exibição de um perfil
+  const getRoleDisplayName = (authority: string): string => {
+    switch (authority) {
+      case 'ADMINISTRADOR':
+        return 'Administrador';
+      case 'OPERADOR':
+        return 'Operador';
+      default:
+        return authority; // Retorna o próprio valor se não tiver mapeamento
     }
   };
 
@@ -96,11 +176,13 @@ export function UserForm({ onSubmit, onCancel }: UserFormProps) {
     <Box
       component="form"
       onSubmit={handleSubmit}
-      sx={formContainerStyles}
+      sx={isEditMode ? { p: 3 } : formContainerStyles}
     >
-      <Typography variant="h5" color="white" gutterBottom sx={{ mb: 4 }}>
-        Novo Usuário
-      </Typography>
+      {!isEditMode && (
+        <Typography variant="h5" color="white" gutterBottom sx={{ mb: 4 }}>
+          Novo Usuário
+        </Typography>
+      )}
 
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
         <Box sx={{ flex: '1 1 45%', minWidth: '300px' }}>
@@ -128,11 +210,11 @@ export function UserForm({ onSubmit, onCancel }: UserFormProps) {
 
         <Box sx={{ flex: '1 1 45%', minWidth: '300px' }}>
           <StyledTextField
-            label="Senha"
-            placeholder="Digite a senha do usuário"
+            label={isEditMode ? "Nova Senha (opcional)" : "Senha"}
+            placeholder={isEditMode ? "Deixe em branco para manter a senha atual" : "Digite a senha do usuário"}
             type="password"
             fullWidth
-            required
+            required={!isEditMode}
             value={formData.password}
             onChange={handlePasswordChange}
             error={!!errors.password}
@@ -142,11 +224,11 @@ export function UserForm({ onSubmit, onCancel }: UserFormProps) {
 
         <Box sx={{ flex: '1 1 45%', minWidth: '300px' }}>
           <StyledTextField
-            label="Confirmar Senha"
-            placeholder="Digite a senha novamente"
+            label={isEditMode ? "Confirmar Nova Senha" : "Confirmar Senha"}
+            placeholder={isEditMode ? "Confirme a nova senha (se alterada)" : "Digite a senha novamente"}
             type="password"
             fullWidth
-            required
+            required={!isEditMode}
             value={formData.confirmPassword}
             onChange={handleConfirmPasswordChange}
             error={!!errors.confirmPassword}
@@ -162,17 +244,51 @@ export function UserForm({ onSubmit, onCancel }: UserFormProps) {
             >
               Perfil de Acesso
             </InputLabel>
-            <StyledSelect
-              labelId="roles-label"
-              multiple
-              value={formData.roles}
-              onChange={(e) => setFormData({ ...formData, roles: e.target.value as string[] })}
-              label="Perfil de Acesso"
-              MenuProps={menuPaperProps}
-            >
-              <StyledMenuItem value="ADMIN">Administrador</StyledMenuItem>
-              <StyledMenuItem value="OPERADOR">Operador</StyledMenuItem>
-            </StyledSelect>
+            {isLoadingRoles ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+                <CircularProgress size={24} sx={{ color: '#FFD700', mr: 2 }} />
+                <Typography color="white" variant="body2">Carregando perfis...</Typography>
+              </Box>
+            ) : (
+              <StyledSelect
+                labelId="roles-label"
+                multiple
+                value={formData.roles.map(role => role.id)}
+                onChange={(e) => {
+                  const selectedIds = e.target.value as number[];
+                  const selectedRoles = availableRoles.filter(role => 
+                    selectedIds.includes(role.id)
+                  );
+                  setFormData({ ...formData, roles: selectedRoles });
+                  
+                  // Limpa o erro de roles se alguma for selecionada
+                  if (selectedRoles.length > 0 && errors.roles) {
+                    setErrors(prev => ({ ...prev, roles: '' }));
+                  } else if (selectedRoles.length === 0) {
+                    setErrors(prev => ({ ...prev, roles: 'Selecione pelo menos um perfil de acesso' }));
+                  }
+                }}
+                label="Perfil de Acesso"
+                MenuProps={menuPaperProps}
+                error={!!errors.roles}
+              >
+                {availableRoles.map(role => (
+                  <StyledMenuItem key={role.id} value={role.id}>
+                    {getRoleDisplayName(role.authority)}
+                  </StyledMenuItem>
+                ))}
+              </StyledSelect>
+            )}
+            {errors.roles && (
+              <Typography variant="caption" sx={{ 
+                color: '#f44336', 
+                marginTop: '4px',
+                display: 'block',
+                fontSize: '0.75rem'
+              }}>
+                {errors.roles}
+              </Typography>
+            )}
           </FormControl>
         </Box>
 

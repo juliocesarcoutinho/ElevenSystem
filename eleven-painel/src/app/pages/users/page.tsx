@@ -15,21 +15,29 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle
+  DialogTitle,
+  DialogProps
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 
 export default function UsuariosPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [totalElements, setTotalElements] = useState(0);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(12);
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Estados para exclusão
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Estados para edição
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [userToEdit, setUserToEdit] = useState<User | null>(null);
 
   const loadUsers = async () => {
     try {
@@ -38,9 +46,15 @@ export default function UsuariosPage() {
       const response = await UserService.getUsers(page, rowsPerPage);
       setUsers(response.content);
       setTotalElements(response.totalElements);
-    } catch (error) {
+          } catch (error: any) {
       console.error('Error loading users:', error);
-      setError('Erro ao carregar usuários. Por favor, tente novamente.');
+      if (error.message === 'Usuário não autenticado') {
+        setError('Sessão expirada. Por favor, faça login novamente.');
+        // Redirecionar para a página de login
+        setTimeout(() => window.location.href = '/login', 2000);
+      } else {
+        setError('Erro ao carregar usuários. Por favor, tente novamente.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -55,10 +69,17 @@ export default function UsuariosPage() {
   };
 
   const handleFormSubmit = async (data: UserFormData) => {
-    // Aqui você implementará a lógica para salvar o novo usuário
-    console.log('Novo usuário:', data);
-    setIsFormVisible(false);
-    await loadUsers(); // Recarrega a lista após criar
+    try {
+      setIsSaving(true);
+      await UserService.createUser(data);
+      setIsFormVisible(false);
+      await loadUsers(); // Recarrega a lista após criar
+    } catch (error) {
+      console.error('Erro ao criar usuário:', error);
+      setError('Erro ao criar usuário. Por favor, tente novamente.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleFormCancel = () => {
@@ -66,8 +87,34 @@ export default function UsuariosPage() {
   };
 
   const handleEditUser = (userId: number) => {
-    console.log('Editar usuário:', userId);
-    // Implementar lógica de edição
+    const user = users.find(u => u.id === userId);
+    if (user) {
+      setUserToEdit(user);
+      setEditDialogOpen(true);
+    }
+  };
+  
+  const handleUpdateUser = async (data: UserFormData) => {
+    if (!userToEdit) return;
+    
+    try {
+      setIsSaving(true);
+      // Certifica-se de que as roles estão no formato correto antes de enviar
+      await UserService.updateUser(userToEdit.id, data);
+      setEditDialogOpen(false);
+      setUserToEdit(null);
+      await loadUsers(); // Recarrega a lista após atualizar
+    } catch (error) {
+      console.error('Erro ao atualizar usuário:', error);
+      setError('Erro ao atualizar usuário. Por favor, tente novamente.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  const handleCancelEdit = () => {
+    setEditDialogOpen(false);
+    setUserToEdit(null);
   };
   
   const handleDeleteUser = (userId: number) => {
@@ -92,7 +139,7 @@ export default function UsuariosPage() {
       
       // Se a página atual ficar vazia após a exclusão e não for a primeira página, 
       // volta para a página anterior
-      if (users.length === 1 && page > 0) {
+      if (users.length === 1 && page > 1) {
         setPage(page - 1);
       } else {
         // Senão, apenas recarrega os dados
@@ -109,6 +156,16 @@ export default function UsuariosPage() {
   const cancelDelete = () => {
     setDeleteConfirmOpen(false);
     setUserToDelete(null);
+  };
+  
+  // Configuração comum para os diálogos
+  const dialogPaperProps = {
+    sx: {
+      backgroundColor: '#242424',
+      color: '#fff',
+      borderRadius: '8px',
+      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)',
+    }
   };
   
   return (
@@ -171,36 +228,87 @@ export default function UsuariosPage() {
           />
         )}
         
+        {/* Diálogo de edição de usuário */}
+        <Dialog
+          open={editDialogOpen}
+          onClose={handleCancelEdit}
+          fullWidth
+          maxWidth="md"
+          PaperProps={dialogPaperProps}
+        >
+          <DialogTitle sx={{ 
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            color: '#FFD700',
+            px: 3,
+            py: 2
+          }}>
+            Editar Usuário
+          </DialogTitle>
+          <DialogContent sx={{ p: 0 }}>
+            {userToEdit && (
+              <UserForm 
+                onSubmit={handleUpdateUser} 
+                onCancel={handleCancelEdit}
+                editingUser={userToEdit}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+        
         {/* Diálogo de confirmação de exclusão */}
         <Dialog
           open={deleteConfirmOpen}
           onClose={cancelDelete}
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
+          PaperProps={dialogPaperProps}
         >
-          <DialogTitle id="alert-dialog-title">
-            {"Confirmar exclusão"}
+          <DialogTitle id="alert-dialog-title" sx={{ 
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            color: '#FFD700'
+          }}>
+            Confirmar exclusão
           </DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-description">
+          <DialogContent sx={{ my: 2 }}>
+            <DialogContentText id="alert-dialog-description" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
               Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.
             </DialogContentText>
           </DialogContent>
-          <DialogActions>
+          <DialogActions sx={{ 
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+            px: 3,
+            py: 2
+          }}>
             <Button 
               onClick={cancelDelete} 
-              color="primary"
+              variant="outlined"
               disabled={isDeleting}
+              sx={{
+                color: 'white',
+                borderColor: 'rgba(255, 255, 255, 0.5)',
+                '&:hover': {
+                  borderColor: '#FFD700',
+                  color: '#FFD700',
+                },
+              }}
             >
               Cancelar
             </Button>
             <Button 
               onClick={confirmDelete} 
-              color="error" 
+              variant="contained"
               autoFocus
               disabled={isDeleting}
+              sx={{
+                ml: 2,
+                backgroundColor: '#ff4444',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: '#ff5555',
+                },
+              }}
             >
-              {isDeleting ? <CircularProgress size={24} /> : "Excluir"}
+              {isDeleting ? <CircularProgress size={24} sx={{ color: 'white' }} /> : "Excluir"}
             </Button>
           </DialogActions>
         </Dialog>

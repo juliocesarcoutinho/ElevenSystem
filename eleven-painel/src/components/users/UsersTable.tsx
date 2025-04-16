@@ -151,7 +151,7 @@ export function UsersTable({
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-            {filteredUsers.length > 0 ? `${(page * rowsPerPage) - rowsPerPage + 1}-${Math.min(page * rowsPerPage, totalElements)} de ${totalElements}` : '0-0 de 0'}
+            {filteredUsers.length > 0 ? `${((page - 1) * rowsPerPage) + 1}-${Math.min(page * rowsPerPage, totalElements)} de ${totalElements}` : '0-0 de 0'}
           </Typography>
           <Pagination
             count={Math.ceil(totalElements / rowsPerPage)}
