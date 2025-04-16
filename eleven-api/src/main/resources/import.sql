@@ -2,16 +2,18 @@
 INSERT INTO tb_user (name, email, password, active, created_at, updated_at) VALUES ('Rebekah Olivia', 'rebekah@gmail.com', '$2a$10$eACCYoNOHEqXve8aIWT8Nu3PkMXWBaOxJ9aORUYzfMQCbVBIhZ8tG', 1, NOW(), NOW());
 INSERT INTO tb_user (name, email, password, active, created_at, updated_at) VALUES ('Miriã Aquino', 'miria@gmail.com', '$2a$10$eACCYoNOHEqXve8aIWT8Nu3PkMXWBaOxJ9aORUYzfMQCbVBIhZ8tG', 1, NOW(), NOW());
 INSERT INTO tb_user (name, email, password, active, created_at, updated_at) VALUES ('Julio Coutinho', 'julio@gmail.com', '$2a$10$eACCYoNOHEqXve8aIWT8Nu3PkMXWBaOxJ9aORUYzfMQCbVBIhZ8tG', 1, NOW(), NOW());
+INSERT INTO tb_user (name, email, password, active, created_at, updated_at) VALUES ('Priscila Coutinho', 'priscila@gmail.com', '$2a$10$eACCYoNOHEqXve8aIWT8Nu3PkMXWBaOxJ9aORUYzfMQCbVBIhZ8tG', 0, NOW(), NOW());
 
 -- Inserir dados na tabela tb_role
 INSERT INTO tb_role (authority) VALUES ('ROLE_OPERATOR');
 INSERT INTO tb_role (authority) VALUES ('ROLE_ADMIN');
 
 -- Inserir dados na tabela tb_user_role
-INSERT INTO tb_user_role (user_id, role_id) VALUES (1, 1); -- Alex Brown como OPERATOR
-INSERT INTO tb_user_role (user_id, role_id) VALUES (2, 1); -- Maria Green como OPERATOR
-INSERT INTO tb_user_role (user_id, role_id) VALUES (2, 2); -- Maria Green como ADMIN
+INSERT INTO tb_user_role (user_id, role_id) VALUES (1, 1); -- Rebekah Brown como OPERATOR
+INSERT INTO tb_user_role (user_id, role_id) VALUES (2, 1); -- Miria Green como OPERATOR
+INSERT INTO tb_user_role (user_id, role_id) VALUES (2, 2); -- Miria Green como ADMIN
 INSERT INTO tb_user_role (user_id, role_id) VALUES (3, 1); -- Julio Coutinho como OPERATOR
+INSERT INTO tb_user_role (user_id, role_id) VALUES (4, 1); -- Priscila Coutinho como OPERATOR
 
 -- Inserir dados na tabela tb_user_profile
 INSERT INTO tb_user_profile (cpf, birth_date, phone, mother_name, father_name, user_id) VALUES ('123.456.789-00', '1990-05-15', '(14) 99999-9999', 'Ana Silva', 'José Silva', 1);    -- Perfil para Alex Brown
