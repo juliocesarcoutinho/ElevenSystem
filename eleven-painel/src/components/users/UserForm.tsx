@@ -36,7 +36,7 @@ interface FormState {
   password: string;
   confirmPassword: string;
   active: boolean;
-  roles: { id: number, authority: string }[];
+  role: { id: number, authority: string } | null;
 }
 
 interface UserFormProps {
@@ -52,13 +52,13 @@ export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
     password: '',
     confirmPassword: '',
     active: true,
-    roles: [],
+    role: null,
   });
 
   const [errors, setErrors] = useState({
     password: '',
     confirmPassword: '',
-    roles: '',
+    role: '',
   });
   
   const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
@@ -78,10 +78,10 @@ export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
         if (!isEditMode && roles.length > 0) {
           const operadorRole = roles.find(role => role.authority === 'OPERADOR');
           if (operadorRole) {
-            setFormData(prev => ({ ...prev, roles: [operadorRole] }));
+            setFormData(prev => ({ ...prev, role: operadorRole }));
           } else {
             // Se não encontrar OPERADOR, usa o primeiro perfil disponível
-            setFormData(prev => ({ ...prev, roles: [roles[0]] }));
+            setFormData(prev => ({ ...prev, role: roles[0] }));
           }
         }
       } catch (error) {
@@ -97,13 +97,16 @@ export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
   // Quando o usuário de edição mudar, atualiza o formulário
   useEffect(() => {
     if (editingUser) {
+      // Pega apenas o primeiro perfil para usar como perfil principal
+      const primaryRole = editingUser.roles.length > 0 ? editingUser.roles[0] : null;
+      
       setFormData({
         name: editingUser.name,
         email: editingUser.email,
         password: '', // Senha vazia na edição
         confirmPassword: '',
         active: editingUser.active,
-        roles: editingUser.roles, // Manter os objetos role completos
+        role: primaryRole, // Usar apenas o primeiro perfil
       });
     }
   }, [editingUser]);
@@ -112,7 +115,7 @@ export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
     const newErrors = {
       password: '',
       confirmPassword: '',
-      roles: '',
+      role: '',
     };
   
     // Validação de senhas
@@ -123,21 +126,27 @@ export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
       }
     }
     
-    // Validação de perfis
-    if (formData.roles.length === 0) {
-      newErrors.roles = 'Selecione pelo menos um perfil de acesso';
+    // Validação de perfil
+    if (!formData.role) {
+      newErrors.role = 'Selecione um perfil de acesso';
     }
   
     setErrors(newErrors);
-    return !newErrors.password && !newErrors.confirmPassword && !newErrors.roles;
+    return !newErrors.password && !newErrors.confirmPassword && !newErrors.role;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      const { confirmPassword: _, ...submitData } = formData;
+      const { confirmPassword: _, role, ...restData } = formData;
       
-      // Se estiver em modo de edição e não tiver senha, remove do payload
+      // Cria o payload com o role dentro de um array roles
+      const submitData = {
+        ...restData,
+        roles: role ? [role] : [] // Converte o perfil único para o formato de array esperado pela API
+      };
+      
+      // Se estiver em modo de edição e não tiver senha, remove do payloadd
       if (isEditMode && !submitData.password) {
         const { password, ...dataWithoutPassword } = submitData;
         onSubmit(dataWithoutPassword);
@@ -253,37 +262,24 @@ export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
             ) : (
               <StyledSelect
                 labelId="roles-label"
-                multiple
                 open={selectOpen}
                 onOpen={() => setSelectOpen(true)}
                 onClose={() => setSelectOpen(false)}
-                value={formData.roles.map(role => role.id)}
-                onChange={(e, child) => {
-                  const selectedIds = e.target.value as number[];
-                  const selectedRoles = availableRoles.filter(role => 
-                    selectedIds.includes(role.id)
-                  );
-                  setFormData({ ...formData, roles: selectedRoles });
+                value={formData.role ? formData.role.id : ''}
+                onChange={(e) => {
+                  const selectedId = e.target.value as number;
+                  const selectedRole = availableRoles.find(role => role.id === selectedId) || null;
+                  setFormData({ ...formData, role: selectedRole });
                   
-                  // Limpa o erro de roles se alguma for selecionada
-                  if (selectedRoles.length > 0 && errors.roles) {
-                    setErrors(prev => ({ ...prev, roles: '' }));
-                  } else if (selectedRoles.length === 0) {
-                    setErrors(prev => ({ ...prev, roles: 'Selecione pelo menos um perfil de acesso' }));
+                  // Limpa o erro de role se alguma for selecionada
+                  if (selectedRole && errors.role) {
+                    setErrors(prev => ({ ...prev, role: '' }));
+                  } else if (!selectedRole) {
+                    setErrors(prev => ({ ...prev, role: 'Selecione um perfil de acesso' }));
                   }
                   
                   // Fecha o menu após seleção
                   setSelectOpen(false);
-                }}
-                renderValue={(selected) => {
-                  // Exibe perfis selecionados em formato de texto
-                  return (
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                      {formData.roles.map((role) => (
-                        <span key={role.id}>{getRoleDisplayName(role.authority)}</span>
-                      )).reduce((prev, curr) => prev === null ? [curr] : [...prev, ', ', curr], null)}
-                    </Box>
-                  );
                 }}
                 label="Perfil de Acesso"
                 MenuProps={{
@@ -291,7 +287,7 @@ export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
                   // Garante que o menu fecha ao clicar em um item
                   disableAutoFocusItem: true,
                 }}
-                error={!!errors.roles}
+                error={!!errors.role}
               >
                 {availableRoles.map(role => (
                   <StyledMenuItem key={role.id} value={role.id}>
@@ -300,14 +296,14 @@ export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
                 ))}
               </StyledSelect>
             )}
-            {errors.roles && (
+            {errors.role && (
               <Typography variant="caption" sx={{ 
                 color: '#f44336', 
                 marginTop: '4px',
                 display: 'block',
                 fontSize: '0.75rem'
               }}>
-                {errors.roles}
+                {errors.role}
               </Typography>
             )}
           </FormControl>
