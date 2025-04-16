@@ -19,16 +19,10 @@ import {
   menuPaperProps,
   formContainerStyles
 } from '@/styles/components/forms.styles';
-import { User } from '@/services/UserService';
+import { User, UserFormData } from '@/services/UserService';
 import { Role, RoleService } from '@/services/RoleService';
 
-interface UserFormData {
-  name: string;
-  email: string;
-  password?: string;
-  active: boolean;
-  roles: string[];
-}
+// Usando a interface UserFormData importada de '@/services/UserService'
 
 interface FormState {
   name: string;
@@ -141,7 +135,7 @@ export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
       const { confirmPassword: _, role, ...restData } = formData;
       
       // Cria o payload com o role dentro de um array roles
-      const submitData = {
+      const submitData: UserFormData = {
         ...restData,
         roles: role ? [role] : [] // Converte o perfil único para o formato de array esperado pela API
       };
