@@ -1,7 +1,20 @@
 import axios from 'axios';
-import { AuthService } from './AuthService';
+import { api } from '@/lib/api';
+import { LoginService } from './LoginService';
 
-interface User {
+// Interface para erros do Axios (para versões que não exportam AxiosError)
+interface AxiosErrorResponse {
+  response?: {
+    status: number;
+    statusText: string;
+    data: any;
+    headers: any;
+  };
+  request?: any;
+  message?: string;
+}
+
+export interface User {
   id: number;
   name: string;
   email: string;
@@ -14,62 +27,111 @@ interface User {
   }[];
 }
 
-interface PaginatedResponse {
+export interface PaginatedResponse {
   content: User[];
   totalElements: number;
   totalPages: number;
   size: number;
   number: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
 }
 
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
-});
-
-// Interceptor para adicionar o token em todas as requisições
-api.interceptors.request.use((config) => {
-  const token = AuthService.getToken();
-  console.log('Token sendo usado:', token); // Debug do token
-  
-  if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
-    console.log('Headers da requisição:', config.headers); // Debug dos headers
-  } else {
-    console.log('Token não encontrado ou headers undefined');
-  }
-  return config;
-});
+export interface UserFormData {
+  name: string;
+  email: string;
+  password: string;
+  active: boolean;
+  roles: string[];
+}
 
 export class UserService {
-  static async getUsers(page: number = 0, size: number = 12, sort: string = 'name,asc'): Promise<PaginatedResponse> {
+  static async getUsers(page: number = 1, size: number = 12, sort: string = 'name,asc'): Promise<PaginatedResponse> {
     try {
-      if (!AuthService.isAuthenticated()) {
-        console.log('Usuário não autenticado');
+      if (!LoginService.isAuthenticated()) {
         throw new Error('Usuário não autenticado');
       }
-
-      console.log('Iniciando requisição para buscar usuários');
-      console.log('URL:', '/users');
-      console.log('Parâmetros:', { page, size, sort });
-      
       const { data } = await api.get<PaginatedResponse>('/users', {
         params: { page, size, sort }
       });
 
-      console.log('Resposta recebida:', data);
       return data;
     } catch (error) {
-      if (axios.isAxiosError(error)) {
+      // Verifica se é um erro do Axios
+      const axiosError = error as AxiosErrorResponse;
+      if (axiosError && axiosError.response) {
         console.error('Erro na requisição:', {
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          data: error.response?.data,
-          headers: error.response?.headers
+          status: axiosError.response.status,
+          statusText: axiosError.response.statusText,
+          data: axiosError.response.data,
+          headers: axiosError.response.headers
         });
 
-        if (error.response?.status === 401) {
+        if (axiosError.response.status === 401) {
           console.log('Token inválido ou expirado');
-          AuthService.logout();
+          LoginService.logout();
+        }
+      }
+      throw error;
+    }
+  }
+
+  static async createUser(userData: UserFormData): Promise<User> {
+    try {
+      if (!LoginService.isAuthenticated()) {
+        throw new Error('Usuário não autenticado');
+      }
+
+      const { data } = await api.post<User>('/users', userData);
+      return data;
+    } catch (error) {
+      const axiosError = error as AxiosErrorResponse;
+      if (axiosError && axiosError.response) {
+        console.error('Erro ao criar usuário:', {
+          status: axiosError.response.status,
+          data: axiosError.response.data
+        });
+
+        if (axiosError.response.status === 401) {
+          LoginService.logout();
+        }
+      }
+      throw error;
+    }
+  }
+
+  static async updateUser(userId: number, userData: Partial<UserFormData>): Promise<User> {
+    try {
+      if (!LoginService.isAuthenticated()) {
+        throw new Error('Usuário não autenticado');
+      }
+
+      const { data } = await api.put<User>(`/users/${userId}`, userData);
+      return data;
+    } catch (error) {
+      const axiosError = error as AxiosErrorResponse;
+      if (axiosError && axiosError.response) {
+        if (axiosError.response.status === 401) {
+          LoginService.logout();
+        }
+      }
+      throw error;
+    }
+  }
+
+  static async deleteUser(userId: number): Promise<void> {
+    try {
+      if (!LoginService.isAuthenticated()) {
+        throw new Error('Usuário não autenticado');
+      }
+
+      await api.delete(`/users/${userId}`);
+    } catch (error) {
+      const axiosError = error as AxiosErrorResponse;
+      if (axiosError && axiosError.response) {
+        if (axiosError.response.status === 401) {
+          LoginService.logout();
         }
       }
       throw error;

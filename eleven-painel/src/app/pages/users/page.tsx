@@ -4,30 +4,9 @@ import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { UsersTable } from '@/components/users/UsersTable';
 import { UserForm } from '@/components/users/UserForm';
-import { UserService } from '@/services/UserService';
+import { UserService, User, UserFormData } from '@/services/UserService';
 import { Box, Button, Typography, Alert, CircularProgress } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  active: boolean;
-  createdAt: string;
-  updatedAt: string;
-  roles: {
-    id: number;
-    authority: string;
-  }[];
-}
-
-interface UserFormData {
-  name: string;
-  email: string;
-  password: string;
-  active: boolean;
-  roles: string[];
-}
 
 export default function UsuariosPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -62,9 +41,10 @@ export default function UsuariosPage() {
   };
 
   const handleFormSubmit = async (data: UserFormData) => {
+    // Aqui você implementará a lógica para salvar o novo usuário
     console.log('Novo usuário:', data);
     setIsFormVisible(false);
-    await loadUsers();
+    await loadUsers(); // Recarrega a lista após criar
   };
 
   const handleFormCancel = () => {

@@ -1,6 +1,7 @@
+'use client';
 import { Box, Button, Container, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
-import { AuthService } from '@/services/AuthService';
+import { LoginService } from '@/services/LoginService';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -11,7 +12,12 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
 
-    const result = await AuthService.login(username, password);
+    const result = await LoginService.login(
+      username, 
+      password,
+      'eleven-frontend',
+      'eleven-secret'
+    );
     
     if (result.success) {
       window.location.href = '/users';
