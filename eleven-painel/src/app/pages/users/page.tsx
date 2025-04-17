@@ -5,6 +5,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { UsersTable } from '@/components/users/UsersTable';
 import { UserForm } from '@/components/users/UserForm';
 import { UserService, User, UserFormData } from '@/services/UserService';
+import { useToast } from '@/contexts/ToastContext';
 import { 
   Box, 
   Button, 
@@ -20,6 +21,7 @@ import {
 import { Add as AddIcon } from '@mui/icons-material';
 
 export default function UsuariosPage() {
+  const { showToast } = useToast();
   const [users, setUsers] = useState<User[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]); // Armazena todos os usuários para busca local
   const [totalElements, setTotalElements] = useState(0);
@@ -30,7 +32,6 @@ export default function UsuariosPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   
@@ -220,16 +221,14 @@ export default function UsuariosPage() {
     loadUsers();
   }, [loadUsers]);
   
-  // Efeito para limpar mensagens quando componente é montado
+  // Efeito para limpar erros quando componente é montado
   useEffect(() => {
-    // Limpa mensagens quando o componente é montado
+    // Limpa erros quando o componente é montado
     setError(null);
-    setSuccessMessage(null);
     
-    // Limpa qualquer mensagem pendente ao desmontar
+    // Limpa qualquer erro pendente ao desmontar
     return () => {
       setError(null);
-      setSuccessMessage(null);
     };
   }, []);
 
@@ -245,13 +244,8 @@ export default function UsuariosPage() {
       
       await UserService.createUser(data);
       
-      // Exibe mensagem de sucesso
-      setSuccessMessage(`Usuário "${data.name}" criado com sucesso!`);
-      
-      // Configura um timer para remover a mensagem após 5 segundos
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 5000);
+      // Exibe notificação de sucesso
+      showToast(`Usuário "${data.name}" criado com sucesso!`, 'success');
       
       setIsFormVisible(false);
       
@@ -282,15 +276,16 @@ export default function UsuariosPage() {
             `Campo ${err.fieldName}: ${err.message}`
           ).join('. ');
           
-          setError(`Erro na validação: ${errorMessages}`);
+          // Mostrar erro de validação como toast
+          showToast(`Erro na validação: ${errorMessages}`, 'error');
         } else if (apiError.message) {
           // Usa a mensagem de erro da API
-          setError(`Erro: ${apiError.message}`);
+          showToast(`Erro: ${apiError.message}`, 'error');
         } else {
-          setError('Erro ao criar usuário. Por favor, tente novamente.');
+          showToast('Erro ao criar usuário. Por favor, tente novamente.', 'error');
         }
       } else {
-        setError('Erro ao criar usuário. Por favor, tente novamente.');
+        showToast('Erro ao criar usuário. Por favor, tente novamente.', 'error');
       }
     } finally {
       setIsSaving(false);
@@ -320,13 +315,8 @@ export default function UsuariosPage() {
       // Certifica-se de que as roles estão no formato correto antes de enviar
       await UserService.updateUser(userToEdit.id, data);
       
-      // Exibe mensagem de sucesso
-      setSuccessMessage(`Usuário "${data.name}" atualizado com sucesso!`);
-      
-      // Configura um timer para remover a mensagem após 5 segundos
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 5000);
+      // Exibe notificação de sucesso
+      showToast(`Usuário "${data.name}" atualizado com sucesso!`, 'success');
       
       setEditDialogOpen(false);
       setUserToEdit(null);
@@ -358,15 +348,16 @@ export default function UsuariosPage() {
             `Campo ${err.fieldName}: ${err.message}`
           ).join('. ');
           
-          setError(`Erro na validação: ${errorMessages}`);
+          // Mostrar erro de validação como toast
+          showToast(`Erro na validação: ${errorMessages}`, 'error');
         } else if (apiError.message) {
           // Usa a mensagem de erro da API
-          setError(`Erro: ${apiError.message}`);
+          showToast(`Erro: ${apiError.message}`, 'error');
         } else {
-          setError('Erro ao atualizar usuário. Por favor, tente novamente.');
+          showToast('Erro ao atualizar usuário. Por favor, tente novamente.', 'error');
         }
       } else {
-        setError('Erro ao atualizar usuário. Por favor, tente novamente.');
+        showToast('Erro ao atualizar usuário. Por favor, tente novamente.', 'error');
       }
     } finally {
       setIsSaving(false);
@@ -396,13 +387,8 @@ export default function UsuariosPage() {
       
       await UserService.deleteUser(userToDelete);
       
-      // Exibe mensagem de sucesso
-      setSuccessMessage(`Usuário "${userName}" excluído com sucesso!`);
-      
-      // Configura um timer para remover a mensagem após 5 segundos
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 5000);
+      // Exibe notificação de sucesso
+      showToast(`Usuário "${userName}" excluído com sucesso!`, 'success');
       
       // Remove o usuário da lista local para atualização imediata da UI
       setUsers(prevUsers => prevUsers.filter(user => user.id !== userToDelete));
@@ -420,7 +406,7 @@ export default function UsuariosPage() {
       }
     } catch (error) {
       console.error('Erro ao excluir usuário:', error);
-      setError('Erro ao excluir usuário. Por favor, tente novamente.');
+      showToast('Erro ao excluir usuário. Por favor, tente novamente.', 'error');
     } finally {
       setIsDeleting(false);
     }
@@ -501,26 +487,6 @@ export default function UsuariosPage() {
             }}
           >
             {error}
-          </Alert>
-        )}
-        
-        {successMessage && (
-          <Alert 
-            severity="success" 
-            onClose={() => setSuccessMessage(null)}
-            sx={{ 
-              mb: 2,
-              backgroundColor: 'rgba(46, 125, 50, 0.5)',
-              color: '#fff',
-              '.MuiAlert-icon': {
-                color: '#4CAF50'
-              },
-              '.MuiAlert-action': {
-                color: '#fff',
-              }
-            }}
-          >
-            {successMessage}
           </Alert>
         )}
 

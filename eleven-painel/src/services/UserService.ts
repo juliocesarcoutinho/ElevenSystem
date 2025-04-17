@@ -1,7 +1,6 @@
 import { api } from '@/lib/api';
 import { LoginService } from './LoginService';
 
-// Interface para erros do Axios (para versões que não exportam AxiosError)
 interface AxiosErrorResponse {
   response?: {
     status: number;
