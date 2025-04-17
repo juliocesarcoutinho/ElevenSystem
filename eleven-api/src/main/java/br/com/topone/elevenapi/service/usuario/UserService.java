@@ -15,6 +15,7 @@ import br.com.topone.elevenapi.service.EmailService;
 import br.com.topone.elevenapi.service.exceptions.DatabaseException;
 import br.com.topone.elevenapi.service.exceptions.EmailException;
 import br.com.topone.elevenapi.service.exceptions.ResourceNotFoundException;
+import br.com.topone.elevenapi.util.CapitalizeUtil;
 import jakarta.mail.MessagingException;
 import jakarta.mail.SendFailedException;
 import jakarta.persistence.EntityNotFoundException;
@@ -45,18 +46,21 @@ public class UserService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private EmailService emailService;
     private AuthService authService;
+    private final CapitalizeUtil formatToTitleCase;
 
     public UserService(
             UserRepository repository,
             RoleRepository roleRepository,
             PasswordEncoder passwordEncoder,
             EmailService emailService,
-            AuthService authService) {
+            AuthService authService,
+            CapitalizeUtil formatToTitleCase) {
         this.repository = repository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
         this.authService = authService;
+        this.formatToTitleCase = formatToTitleCase;
     }
 
     @Override
@@ -156,8 +160,8 @@ public class UserService implements UserDetailsService {
 
     // Copy DTO to entity
     private void copyDtoToEntity(UserDTO dto, User entity) {
-        entity.setName(dto.getName());
-        entity.setEmail(dto.getEmail());
+        entity.setName(formatToTitleCase.capitalize(dto.getName()));
+        entity.setEmail(dto.getEmail().toLowerCase());
         entity.setActive(dto.isActive());
         entity.getRoles().clear();
         for (RoleDTO roleDTO : dto.getRoles()) {
