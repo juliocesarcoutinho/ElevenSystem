@@ -30,6 +30,7 @@ export default function UsuariosPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   
@@ -150,6 +151,7 @@ export default function UsuariosPage() {
       
       setIsLoading(true);
       setError(null);
+      // Não limpa mensagens de sucesso aqui, para que o usuário possa ver a confirmação
       console.log(`Carregando usuários: página ${page}, busca "${searchTerm}"`);
       
       // Se é a primeira carga ou não temos busca, carregamos todos os usuários para cache local
@@ -217,6 +219,19 @@ export default function UsuariosPage() {
   useEffect(() => {
     loadUsers();
   }, [loadUsers]);
+  
+  // Efeito para limpar mensagens quando componente é montado
+  useEffect(() => {
+    // Limpa mensagens quando o componente é montado
+    setError(null);
+    setSuccessMessage(null);
+    
+    // Limpa qualquer mensagem pendente ao desmontar
+    return () => {
+      setError(null);
+      setSuccessMessage(null);
+    };
+  }, []);
 
   const handleNewUser = () => {
     setIsFormVisible(true);
@@ -226,7 +241,18 @@ export default function UsuariosPage() {
     try {
       setIsSaving(true);
       setFieldErrors({});
+      setError(null); // Limpa qualquer erro anterior
+      
       await UserService.createUser(data);
+      
+      // Exibe mensagem de sucesso
+      setSuccessMessage(`Usuário "${data.name}" criado com sucesso!`);
+      
+      // Configura um timer para remover a mensagem após 5 segundos
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 5000);
+      
       setIsFormVisible(false);
       
       // Limpar o cache local para forçar uma recarga completa
@@ -289,8 +315,19 @@ export default function UsuariosPage() {
     try {
       setIsSaving(true);
       setFieldErrors({});
+      setError(null); // Limpa qualquer erro anterior
+      
       // Certifica-se de que as roles estão no formato correto antes de enviar
       await UserService.updateUser(userToEdit.id, data);
+      
+      // Exibe mensagem de sucesso
+      setSuccessMessage(`Usuário "${data.name}" atualizado com sucesso!`);
+      
+      // Configura um timer para remover a mensagem após 5 segundos
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 5000);
+      
       setEditDialogOpen(false);
       setUserToEdit(null);
       
@@ -351,7 +388,21 @@ export default function UsuariosPage() {
     
     try {
       setIsDeleting(true);
+      setError(null); // Limpa qualquer erro anterior
+      
+      // Salva o nome do usuário antes de excluí-lo para usar na mensagem
+      const userToBeDeleted = allUsers.find(user => user.id === userToDelete);
+      const userName = userToBeDeleted ? userToBeDeleted.name : "Usuário";
+      
       await UserService.deleteUser(userToDelete);
+      
+      // Exibe mensagem de sucesso
+      setSuccessMessage(`Usuário "${userName}" excluído com sucesso!`);
+      
+      // Configura um timer para remover a mensagem após 5 segundos
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 5000);
       
       // Remove o usuário da lista local para atualização imediata da UI
       setUsers(prevUsers => prevUsers.filter(user => user.id !== userToDelete));
@@ -436,16 +487,40 @@ export default function UsuariosPage() {
         {error && (
           <Alert 
             severity="error" 
+            onClose={() => setError(null)}
             sx={{ 
               mb: 2,
               backgroundColor: '#ff44447a',
               color: '#fff',
               '.MuiAlert-icon': {
                 color: '#ff4444'
+              },
+              '.MuiAlert-action': {
+                color: '#fff',
               }
             }}
           >
             {error}
+          </Alert>
+        )}
+        
+        {successMessage && (
+          <Alert 
+            severity="success" 
+            onClose={() => setSuccessMessage(null)}
+            sx={{ 
+              mb: 2,
+              backgroundColor: 'rgba(46, 125, 50, 0.5)',
+              color: '#fff',
+              '.MuiAlert-icon': {
+                color: '#4CAF50'
+              },
+              '.MuiAlert-action': {
+                color: '#fff',
+              }
+            }}
+          >
+            {successMessage}
           </Alert>
         )}
 
