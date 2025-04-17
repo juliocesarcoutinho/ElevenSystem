@@ -32,6 +32,15 @@ public class UserResource {
         return ResponseEntity.ok().body(users);
     }
     
+    // buscar por nome
+    @GetMapping("/search")
+    public ResponseEntity<Page<UserDTO>> findByName(
+            @RequestParam(value = "name", defaultValue = "") String name,
+            Pageable pageable) {
+        Page<UserDTO> users = service.findByName(name, pageable);
+        return ResponseEntity.ok().body(users);
+    }
+    
     // find by id
     @GetMapping(value = "/{id}")
     public ResponseEntity<UserDTO> findById(@PathVariable("id") Long id) {

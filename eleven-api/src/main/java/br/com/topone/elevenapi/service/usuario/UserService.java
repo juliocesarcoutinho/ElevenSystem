@@ -87,6 +87,13 @@ public class UserService implements UserDetailsService {
         Page<User> list = repository.findAll(pageable);
         return list.map(UserDTO::new);
     }
+    
+    // buscar usuários por parte do nome
+    @Transactional(readOnly = true)
+    public Page<UserDTO> findByName(String name, Pageable pageable) {
+        Page<User> list = repository.findByNameContainingIgnoreCase(name, pageable);
+        return list.map(UserDTO::new);
+    }
 
     // find by id
     @Transactional(readOnly = true)
