@@ -6,11 +6,23 @@ interface AxiosErrorResponse {
   response?: {
     status: number;
     statusText: string;
-    data: unknown;
+    data: ApiErrorResponse;
     headers: Record<string, string>;
   };
   request?: unknown;
   message?: string;
+}
+
+interface ApiErrorResponse {
+  error?: string;
+  message?: string;
+  errors?: Array<{
+    fieldName: string;
+    message: string;
+  }>;
+  status?: number;
+  path?: string;
+  timestamp?: string;
 }
 
 export interface User {

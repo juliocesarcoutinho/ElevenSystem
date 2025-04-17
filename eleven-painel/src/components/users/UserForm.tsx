@@ -37,9 +37,10 @@ interface UserFormProps {
   onSubmit: (data: UserFormData) => void;
   onCancel: () => void;
   editingUser?: User | null;
+  apiErrors?: { [key: string]: string };
 }
 
-export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
+export function UserForm({ onSubmit, onCancel, editingUser, apiErrors }: UserFormProps) {
   const [formData, setFormData] = useState<FormState>({
     name: '',
     email: '',
@@ -50,6 +51,8 @@ export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
   });
 
   const [errors, setErrors] = useState({
+    name: '',
+    email: '',
     password: '',
     confirmPassword: '',
     role: '',
@@ -104,19 +107,62 @@ export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
       });
     }
   }, [editingUser]);
+  
+  // Processar erros da API quando eles mudarem
+  useEffect(() => {
+    if (apiErrors) {
+      const newErrors = { ...errors };
+      
+      // Mapeie os erros da API para os campos do formulário
+      if (apiErrors.email) {
+        newErrors.email = apiErrors.email;
+      }
+      if (apiErrors.name) {
+        newErrors.name = apiErrors.name;
+      }
+      if (apiErrors.password) {
+        newErrors.password = apiErrors.password;
+      }
+      
+      setErrors(newErrors);
+    }
+  }, [apiErrors]);
 
   const validateForm = () => {
     const newErrors = {
+      name: '',
+      email: '',
       password: '',
       confirmPassword: '',
       role: '',
     };
+    
+    // Validação do nome
+    if (!formData.name.trim()) {
+      newErrors.name = 'O nome é obrigatório';
+    }
+    
+    // Validação básica de email
+    if (!formData.email) {
+      newErrors.email = 'O email é obrigatório';
+    } else if (!formData.email.includes('@')) {
+      newErrors.email = 'Email inválido';
+    }
   
     // Validação de senhas
     // Em modo de edição, só validamos as senhas se alguma delas for preenchida
     if (!(isEditMode && !formData.password && !formData.confirmPassword)) {
-      if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
-        newErrors.confirmPassword = 'As senhas não coincidem';
+      // Se ambos os campos de senha estiverem preenchidos, verifica se são iguais
+      if (formData.password || formData.confirmPassword) {
+        // Valida se senha tem pelo menos 8 caracteres
+        if (formData.password && formData.password.length < 8) {
+          newErrors.password = 'A senha deve ter pelo menos 8 caracteres';
+        }
+        
+        // Valida se as senhas são iguais (quando ambas estão preenchidas)
+        if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
+          newErrors.confirmPassword = 'As senhas não coincidem';
+        }
       }
     }
     
@@ -126,11 +172,17 @@ export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
     }
   
     setErrors(newErrors);
-    return !newErrors.password && !newErrors.confirmPassword && !newErrors.role;
+    return !newErrors.name && !newErrors.email && !newErrors.password && !newErrors.confirmPassword && !newErrors.role;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Verificando senhas:', {
+      senha: formData.password,
+      confirmacao: formData.confirmPassword,
+      saoIguais: formData.password === formData.confirmPassword
+    });
+    
     if (validateForm()) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, role, ...restData } = formData;
@@ -141,7 +193,7 @@ export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
         roles: role ? [role] : [] // Converte o perfil único para o formato de array esperado pela API
       };
       
-      // Se estiver em modo de edição e não tiver senha, remove do payloadd
+      // Se estiver em modo de edição e não tiver senha, remove do payload
       if (isEditMode && !submitData.password) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password, ...dataWithoutPassword } = submitData;
@@ -153,16 +205,34 @@ export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
   };
   
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, password: e.target.value });
+    const newPassword = e.target.value;
+    setFormData(prev => ({ ...prev, password: newPassword }));
+    
+    // Valida em tempo real se a confirmação de senha já foi digitada
     if (formData.confirmPassword) {
-      validateForm();
+      const newErrors = { ...errors };
+      if (newPassword !== formData.confirmPassword) {
+        newErrors.confirmPassword = 'As senhas não coincidem';
+      } else {
+        newErrors.confirmPassword = '';
+      }
+      setErrors(newErrors);
     }
   };
   
   const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, confirmPassword: e.target.value });
+    const newConfirmPassword = e.target.value;
+    setFormData(prev => ({ ...prev, confirmPassword: newConfirmPassword }));
+    
+    // Valida em tempo real
     if (formData.password) {
-      validateForm();
+      const newErrors = { ...errors };
+      if (formData.password !== newConfirmPassword) {
+        newErrors.confirmPassword = 'As senhas não coincidem';
+      } else {
+        newErrors.confirmPassword = '';
+      }
+      setErrors(newErrors);
     }
   };
 
@@ -198,7 +268,17 @@ export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
             fullWidth
             required
             value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            onChange={(e) => {
+              const name = e.target.value;
+              setFormData(prev => ({ ...prev, name }));
+              if (!name.trim()) {
+                setErrors(prev => ({ ...prev, name: 'O nome é obrigatório' }));
+              } else {
+                setErrors(prev => ({ ...prev, name: '' }));
+              }
+            }}
+            error={!!errors.name}
+            helperText={errors.name}
           />
         </Box>
 
@@ -210,7 +290,19 @@ export function UserForm({ onSubmit, onCancel, editingUser }: UserFormProps) {
             fullWidth
             required
             value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            onChange={(e) => {
+              const email = e.target.value;
+              setFormData(prev => ({ ...prev, email }));
+              
+              // Validação básica
+              if (email && !email.includes('@')) {
+                setErrors(prev => ({ ...prev, email: 'Email inválido' }));
+              } else {
+                setErrors(prev => ({ ...prev, email: '' }));
+              }
+            }}
+            error={!!errors.email}
+            helperText={errors.email}
           />
         </Box>
 

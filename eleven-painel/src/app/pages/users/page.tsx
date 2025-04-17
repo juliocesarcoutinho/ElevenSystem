@@ -38,6 +38,9 @@ export default function UsuariosPage() {
   // Estados para edição
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [userToEdit, setUserToEdit] = useState<User | null>(null);
+  
+  // Estado para armazenar erros de campo da API
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
 
   const loadUsers = useCallback(async () => {
     try {
@@ -72,12 +75,42 @@ export default function UsuariosPage() {
   const handleFormSubmit = async (data: UserFormData) => {
     try {
       setIsSaving(true);
+      setFieldErrors({});
       await UserService.createUser(data);
       setIsFormVisible(false);
       await loadUsers(); // Recarrega a lista após criar
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao criar usuário:', error);
-      setError('Erro ao criar usuário. Por favor, tente novamente.');
+      
+      // Tenta extrair a mensagem de erro da resposta da API
+      if (error.response && error.response.data) {
+        const apiError = error.response.data;
+        
+        // Verifica se temos erros de validação de campo
+        if (apiError.errors && apiError.errors.length > 0) {
+          // Cria um objeto de erros para os campos específicos
+          const newFieldErrors: { [key: string]: string } = {};
+          
+          apiError.errors.forEach((err: any) => {
+            newFieldErrors[err.fieldName] = err.message;
+          });
+          
+          setFieldErrors(newFieldErrors);
+          
+          const errorMessages = apiError.errors.map((err: any) => 
+            `Campo ${err.fieldName}: ${err.message}`
+          ).join('. ');
+          
+          setError(`Erro na validação: ${errorMessages}`);
+        } else if (apiError.message) {
+          // Usa a mensagem de erro da API
+          setError(`Erro: ${apiError.message}`);
+        } else {
+          setError('Erro ao criar usuário. Por favor, tente novamente.');
+        }
+      } else {
+        setError('Erro ao criar usuário. Por favor, tente novamente.');
+      }
     } finally {
       setIsSaving(false);
     }
@@ -100,14 +133,44 @@ export default function UsuariosPage() {
     
     try {
       setIsSaving(true);
+      setFieldErrors({});
       // Certifica-se de que as roles estão no formato correto antes de enviar
       await UserService.updateUser(userToEdit.id, data);
       setEditDialogOpen(false);
       setUserToEdit(null);
       await loadUsers(); // Recarrega a lista após atualizar
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao atualizar usuário:', error);
-      setError('Erro ao atualizar usuário. Por favor, tente novamente.');
+      
+      // Tenta extrair a mensagem de erro da resposta da API
+      if (error.response && error.response.data) {
+        const apiError = error.response.data;
+        
+        // Verifica se temos erros de validação de campo
+        if (apiError.errors && apiError.errors.length > 0) {
+          // Cria um objeto de erros para os campos específicos
+          const newFieldErrors: { [key: string]: string } = {};
+          
+          apiError.errors.forEach((err: any) => {
+            newFieldErrors[err.fieldName] = err.message;
+          });
+          
+          setFieldErrors(newFieldErrors);
+          
+          const errorMessages = apiError.errors.map((err: any) => 
+            `Campo ${err.fieldName}: ${err.message}`
+          ).join('. ');
+          
+          setError(`Erro na validação: ${errorMessages}`);
+        } else if (apiError.message) {
+          // Usa a mensagem de erro da API
+          setError(`Erro: ${apiError.message}`);
+        } else {
+          setError('Erro ao atualizar usuário. Por favor, tente novamente.');
+        }
+      } else {
+        setError('Erro ao atualizar usuário. Por favor, tente novamente.');
+      }
     } finally {
       setIsSaving(false);
     }
@@ -215,7 +278,11 @@ export default function UsuariosPage() {
             <CircularProgress sx={{ color: '#FFD700' }} />
           </Box>
         ) : isFormVisible ? (
-          <UserForm onSubmit={handleFormSubmit} onCancel={handleFormCancel} />
+          <UserForm 
+            onSubmit={handleFormSubmit}
+            onCancel={handleFormCancel}
+            apiErrors={fieldErrors}
+          />
         ) : (
           <UsersTable
             users={users}
@@ -251,6 +318,7 @@ export default function UsuariosPage() {
                 onSubmit={handleUpdateUser} 
                 onCancel={handleCancelEdit}
                 editingUser={userToEdit}
+                apiErrors={fieldErrors}
               />
             )}
           </DialogContent>
