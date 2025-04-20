@@ -72,7 +72,7 @@ public class CustomPasswordAuthenticationProvider implements AuthenticationProvi
 
 		// Verificar se o usuário está ativo
 		if (!user.isEnabled()) {
-			throw new OAuth2AuthenticationException("Usuário inativo, favor verificar com o administrador");
+			throw new OAuth2AuthenticationException("Inactive user, please check with the administrator");
 		}
 
 
