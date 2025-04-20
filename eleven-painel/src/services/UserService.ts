@@ -362,4 +362,23 @@ export class UserService {
       throw error;
     }
   }
+  
+  static async findMe(): Promise<User> {
+    try {
+      if (!LoginService.isAuthenticated()) {
+        throw new Error('Usuário não autenticado');
+      }
+      
+      const { data } = await api.get<User>('users/me');
+      return data;
+    } catch (error) {
+      const axiosError = error as AxiosErrorResponse;
+      if (axiosError && axiosError.response) {
+        if (axiosError.response.status === 401) {
+          LoginService.logout();
+        }
+      }
+      throw error;
+    }
+  }
 } 

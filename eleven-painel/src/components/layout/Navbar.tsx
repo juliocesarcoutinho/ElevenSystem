@@ -128,7 +128,10 @@ export function Navbar({ isSidebarOpen }: NavbarProps) {
             }
           }}
         >
-          <MenuItem onClick={handleClose} sx={{ gap: 1 }}>
+          <MenuItem onClick={() => {
+            handleClose();
+            router.push('/profile');
+          }} sx={{ gap: 1 }}>
             <PersonIcon fontSize="small" sx={{ color: '#FFD700' }} />
             <Typography>Perfil</Typography>
           </MenuItem>
