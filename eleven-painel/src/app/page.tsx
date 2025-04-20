@@ -14,10 +14,14 @@ import {
   DialogActions,
   CircularProgress,
   Snackbar,
-  Alert
+  Alert,
+  InputAdornment,
+  IconButton
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { LoginService } from '@/services/LoginService';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 const StyledTextField = styled(TextField)({
   '& .MuiOutlinedInput-root': {
@@ -67,6 +71,7 @@ const StyledTextField = styled(TextField)({
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({
     email: '',
     password: ''
@@ -163,6 +168,10 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+  
+  const handleTogglePasswordVisibility = () => {
+    setShowPassword((show) => !show);
+  };
 
   return (
     <Box
@@ -238,7 +247,7 @@ export default function LoginPage() {
             </Typography>
             <StyledTextField
               fullWidth
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               placeholder="Senha"
               value={password}
               onChange={(e) => {
@@ -249,6 +258,20 @@ export default function LoginPage() {
               }}
               error={!!errors.password}
               helperText={errors.password}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="alternar visibilidade da senha"
+                      onClick={handleTogglePasswordVisibility}
+                      edge="end"
+                      sx={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
 
             <Box textAlign="center" mb={3}>
