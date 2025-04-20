@@ -136,6 +136,15 @@ export function ProfileForm({ onSubmit, user, apiErrors }: ProfileFormProps) {
         onSubmit(dataWithoutPassword);
       } else {
         onSubmit(submitData);
+        
+        // Limpa os campos de senha após o envio bem-sucedido
+        setTimeout(() => {
+          setFormData(prev => ({
+            ...prev,
+            password: '',
+            confirmPassword: ''
+          }));
+        }, 500);
       }
     }
   };

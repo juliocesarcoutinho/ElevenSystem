@@ -10,13 +10,14 @@ import {
 import { User, UserFormData, UserService } from '@/services/UserService';
 import { ProfileForm } from '@/components/profile/ProfileForm';
 import { formContainerStyles } from '@/styles/components/forms.styles';
+import { useToast } from '@/contexts/ToastContext';
 
 export function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [apiErrors, setApiErrors] = useState<{[key: string]: string}>({});
+  const { showToast } = useToast();
 
   useEffect(() => {
     const loadUserProfile = async () => {
@@ -28,13 +29,14 @@ export function ProfilePage() {
       } catch (err) {
         console.error('Erro ao carregar perfil:', err);
         setError('Não foi possível carregar seus dados de perfil. Tente novamente mais tarde.');
+        showToast('Erro ao carregar perfil', 'error');
       } finally {
         setLoading(false);
       }
     };
 
     loadUserProfile();
-  }, []);
+  }, [showToast]);
 
   const handleUpdateProfile = async (formData: UserFormData) => {
     if (!user) return;
@@ -47,13 +49,8 @@ export function ProfilePage() {
       const updatedUser = await UserService.findMe();
       setUser(updatedUser);
       
-      setSuccess('Perfil atualizado com sucesso!');
+      showToast('Perfil atualizado com sucesso!', 'success');
       setApiErrors({});
-      
-      // Limpa a mensagem de sucesso após 5 segundos
-      setTimeout(() => {
-        setSuccess(null);
-      }, 5000);
     } catch (err: any) {
       console.error('Erro ao atualizar perfil:', err);
       
@@ -66,6 +63,7 @@ export function ProfilePage() {
         setApiErrors(errors);
       } else {
         setError('Não foi possível atualizar seu perfil. Tente novamente mais tarde.');
+        showToast('Não foi possível atualizar seu perfil', 'error');
       }
     } finally {
       setLoading(false);
@@ -87,12 +85,6 @@ export function ProfilePage() {
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {error}
-        </Alert>
-      )}
-
-      {success && (
-        <Alert severity="success" sx={{ mb: 3 }}>
-          {success}
         </Alert>
       )}
 
