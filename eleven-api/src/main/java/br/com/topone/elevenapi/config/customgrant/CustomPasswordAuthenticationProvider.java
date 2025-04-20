@@ -70,6 +70,12 @@ public class CustomPasswordAuthenticationProvider implements AuthenticationProvi
 			throw new OAuth2AuthenticationException("Invalid credentials");
 		}
 
+		// Verificar se o usuário está ativo
+		if (!user.isEnabled()) {
+			throw new OAuth2AuthenticationException("Usuário inativo, favor verificar com o administrador");
+		}
+
+
 		authorizedScopes = user.getAuthorities().stream()
 				.map(scope -> scope.getAuthority())
 				.filter(scope -> registeredClient.getScopes().contains(scope))
