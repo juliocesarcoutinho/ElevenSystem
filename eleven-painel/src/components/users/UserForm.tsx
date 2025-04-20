@@ -7,7 +7,11 @@ import {
   InputLabel,
   Typography,
   CircularProgress,
-} from '@mui/material';
+  InputAdornment,
+  IconButton,
+  } from '@mui/material';
+  import VisibilityIcon from '@mui/icons-material/Visibility';
+  import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 import {
   StyledTextField,
