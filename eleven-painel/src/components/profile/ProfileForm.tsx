@@ -116,7 +116,19 @@ export function ProfileForm({ onSubmit, user, apiErrors }: ProfileFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (validateForm()) {
+    // Primeira validação antes de prosseguir
+    const isValid = validateForm();
+    
+    // Verificação extra para senha/confirmação
+    if (formData.password && !formData.confirmPassword) {
+      setErrors(prev => ({
+        ...prev,
+        confirmPassword: 'A confirmação da senha é obrigatória'
+      }));
+      return;
+    }
+    
+    if (isValid) {
       setIsSubmitting(true);
       
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
