@@ -8,6 +8,8 @@ import {
   IconButton,
   Divider,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -45,6 +47,8 @@ type MenuItem = MenuLink | MenuDivider;
 
 export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const router = useRouter();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const menuItems: MenuItem[] = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/pages/dashboard' },
@@ -64,12 +68,14 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
   return (
     <Drawer
-      variant="permanent"
+      variant={isMobile ? "temporary" : "permanent"}
+      open={isMobile ? isOpen : true}
+      onClose={isMobile ? onToggle : undefined}
       sx={{
-        width: isOpen ? 240 : 73,
+        width: isOpen ? 240 : (isMobile ? 0 : 73),
         flexShrink: 0,
         '& .MuiDrawer-paper': {
-          width: isOpen ? 240 : 73,
+          width: isOpen ? 240 : (isMobile ? 240 : 73),
           boxSizing: 'border-box',
           backgroundColor: '#242424',
           color: 'white',
