@@ -404,9 +404,21 @@ export default function UsuariosPage() {
       if (users.length === 1 && page > 1) {
         setPage(page - 1);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao excluir usuário:', error);
-      showToast('Erro ao excluir usuário. Por favor, tente novamente.', 'error');
+      
+      // Fecha o diálogo de confirmação, independentemente do tipo de erro
+      setDeleteConfirmOpen(false);
+      setUserToDelete(null);
+      
+      // Verifica se é um erro 403 (usando a propriedade isForbidden ou o status da resposta)
+      if (error.isForbidden || (error.response && error.response.status === 403)) {
+        // Exibimos a mensagem de erro de permissão negada
+        showToast('Acesso negado. Você não tem permissão para excluir este usuário.', 'error');
+      } else {
+        // Para outros tipos de erro, mostramos uma mensagem genérica
+        showToast('Erro ao excluir usuário. Por favor, tente novamente.', 'error');
+      }
     } finally {
       setIsDeleting(false);
     }

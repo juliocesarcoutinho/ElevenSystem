@@ -1,9 +1,10 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { Toast, ToastType } from '@/components/ui/Toast';
 import { Box } from '@mui/material';
 import { v4 as uuidv4 } from 'uuid';
+import { registerToast } from '@/lib/api';
 
 interface ToastMessage {
   id: string;
@@ -27,14 +28,11 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [mounted, setMounted] = useState(false);
   
-  // Efeito para garantir que o componente só renderize no cliente
-  useEffect(() => {
-    setMounted(true);
-    return () => setMounted(false);
-  }, []);
-
-  const showToast = (message: string, type: ToastType, duration: number = 3000) => {
+  // Usando useCallback para evitar recriação da função em cada renderização
+  const showToast = useCallback((message: string, type: ToastType, duration: number = 3000) => {
     if (!mounted) return;
+    
+    console.log(`Exibindo toast: ${message} (${type})`);
     
     const newToast: ToastMessage = {
       id: uuidv4(),
@@ -45,12 +43,26 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
     
     // Adicionar nova notificação ao estado
     setToasts((prev) => [...prev, newToast]);
-  };
+  }, [mounted]);
 
-  const hideToast = (id: string) => {
+  const hideToast = useCallback((id: string) => {
     if (!mounted) return;
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
-  };
+  }, [mounted]);
+  
+  // Efeito para garantir que o componente só renderize no cliente
+  useEffect(() => {
+    setMounted(true);
+    
+    // Registrar a função de toast diretamente no interceptor
+    registerToast();
+    
+    return () => {
+      setMounted(false);
+      // Limpar o registro do toast ao desmontar
+      registerToast();
+    };
+  }, [showToast]);
 
   return (
     <ToastContext.Provider value={{ showToast, hideToast }}>
