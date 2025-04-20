@@ -49,9 +49,9 @@ export function ProfilePage() {
       const updatedUser = await UserService.findMe();
       setUser(updatedUser);
       
-      showToast('Perfil atualizado com sucesso!', 'success');
+      showToast('Perfil atualizado com sucesso!', 'success', 3000);
       setApiErrors({});
-    } catch (err: any) {
+          } catch (err: any) {
       console.error('Erro ao atualizar perfil:', err);
       
       // Trata erros de validação da API
@@ -63,7 +63,7 @@ export function ProfilePage() {
         setApiErrors(errors);
       } else {
         setError('Não foi possível atualizar seu perfil. Tente novamente mais tarde.');
-        showToast('Não foi possível atualizar seu perfil', 'error');
+        showToast('Não foi possível atualizar seu perfil', 'error', 4000);
       }
     } finally {
       setLoading(false);

@@ -4,7 +4,11 @@ import {
   Button,
   Typography,
   CircularProgress,
+  InputAdornment,
+  IconButton,
 } from '@mui/material';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 import {
   StyledTextField,
@@ -42,6 +46,8 @@ export function ProfileForm({ onSubmit, user, apiErrors }: ProfileFormProps) {
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Quando o usuário mudar, atualiza o formulário
   useEffect(() => {
@@ -113,7 +119,7 @@ export function ProfileForm({ onSubmit, user, apiErrors }: ProfileFormProps) {
     return !newErrors.name && !newErrors.email && !newErrors.password && !newErrors.confirmPassword;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Primeira validação antes de prosseguir
@@ -131,32 +137,35 @@ export function ProfileForm({ onSubmit, user, apiErrors }: ProfileFormProps) {
     if (isValid) {
       setIsSubmitting(true);
       
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { confirmPassword, ...restData } = formData;
-      
-      // Cria o payload mantendo os roles atuais do usuário
-      const submitData: UserFormData = {
-        ...restData,
-        active: user.active, // Mantém o status atual
-        roles: user.roles // Mantém os perfis atuais
-      };
-      
-      // Se não tiver senha, remove do payload
-      if (!submitData.password) {
+      try {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { password, ...dataWithoutPassword } = submitData;
-        onSubmit(dataWithoutPassword);
-      } else {
-        onSubmit(submitData);
+        const { confirmPassword, ...restData } = formData;
         
-        // Limpa os campos de senha após o envio bem-sucedido
-        setTimeout(() => {
+        // Cria o payload mantendo os roles atuais do usuário
+        const submitData: UserFormData = {
+          ...restData,
+          active: user.active, // Mantém o status atual
+          roles: user.roles // Mantém os perfis atuais
+        };
+        
+        // Se não tiver senha, remove do payload
+        if (!submitData.password) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { password, ...dataWithoutPassword } = submitData;
+          onSubmit(dataWithoutPassword);
+        } else {
+          onSubmit(submitData);
+          // Limpa os campos de senha após o envio bem-sucedido
           setFormData(prev => ({
             ...prev,
             password: '',
             confirmPassword: ''
           }));
-        }, 500);
+        }
+      } finally {
+        // Certifica-se de que o estado de submissão é resetado
+        // mesmo em caso de erro
+        setIsSubmitting(false);
       }
     }
   };
@@ -249,12 +258,26 @@ export function ProfileForm({ onSubmit, user, apiErrors }: ProfileFormProps) {
           <StyledTextField
             label="Nova Senha (opcional)"
             placeholder="Digite sua nova senha"
-            type="password"
+            type={showPassword ? "text" : "password"}
             fullWidth
             value={formData.password}
             onChange={handlePasswordChange}
             error={!!errors.password}
             helperText={errors.password}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="alternar visibilidade da senha"
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end"
+                    sx={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                  >
+                    {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
         </Box>
         
@@ -262,12 +285,26 @@ export function ProfileForm({ onSubmit, user, apiErrors }: ProfileFormProps) {
           <StyledTextField
             label="Confirmar Nova Senha"
             placeholder="Confirme sua nova senha"
-            type="password"
+            type={showConfirmPassword ? "text" : "password"}
             fullWidth
             value={formData.confirmPassword}
             onChange={handleConfirmPasswordChange}
             error={!!errors.confirmPassword}
             helperText={errors.confirmPassword}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="alternar visibilidade da confirmação de senha"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    edge="end"
+                    sx={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                  >
+                    {showConfirmPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
         </Box>
       </Box>

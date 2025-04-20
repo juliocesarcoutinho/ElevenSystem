@@ -33,7 +33,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
     return () => setMounted(false);
   }, []);
 
-  const showToast = (message: string, type: ToastType, duration: number = 5000) => {
+  const showToast = (message: string, type: ToastType, duration: number = 3000) => {
     if (!mounted) return;
     
     const newToast: ToastMessage = {
