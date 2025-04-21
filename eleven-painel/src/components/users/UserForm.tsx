@@ -1,32 +1,31 @@
 import {useEffect, useState} from 'react';
 import {
-  Box,
-  Button,
-  CircularProgress,
-  FormControl,
-  FormControlLabel,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  Typography,
+    Box,
+    Button,
+    CircularProgress,
+    FormControl,
+    FormControlLabel,
+    IconButton,
+    InputAdornment,
+    InputLabel,
+    Typography,
+    useMediaQuery,
+    useTheme
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 import {
-  formContainerStyles,
-  inputLabelStyles,
-  menuPaperProps,
-  StyledButton,
-  StyledMenuItem,
-  StyledSelect,
-  StyledSwitch,
-  StyledTextField
+    formContainerStyles,
+    menuPaperProps,
+    StyledButton,
+    StyledMenuItem,
+    StyledSelect,
+    StyledSwitch,
+    StyledTextField
 } from '@/styles/components/forms.styles';
 import {User, UserFormData} from '@/services/UserService';
 import {Role, RoleService} from '@/services/RoleService';
-
-// Usando a interface UserFormData importada de '@/services/UserService'
 
 interface FormState {
     name: string;
@@ -69,6 +68,9 @@ export function UserForm({onSubmit, onCancel, editingUser, apiErrors}: UserFormP
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const isEditMode = !!editingUser;
 
+    const theme = useTheme();
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
     // Carregar os perfis de acesso quando o componente é montado
     useEffect(() => {
         const loadRoles = async () => {
@@ -77,13 +79,11 @@ export function UserForm({onSubmit, onCancel, editingUser, apiErrors}: UserFormP
                 const roles = await RoleService.getRoles();
                 setAvailableRoles(roles);
 
-                // Se não estiver em modo de edição, define o perfil padrão como OPERADOR (se existir)
                 if (!isEditMode && roles.length > 0) {
                     const operadorRole = roles.find(role => role.authority === 'OPERADOR');
                     if (operadorRole) {
                         setFormData(prev => ({...prev, role: operadorRole}));
                     } else {
-                        // Se não encontrar OPERADOR, usa o primeiro perfil disponível
                         setFormData(prev => ({...prev, role: roles[0]}));
                     }
                 }
@@ -100,16 +100,15 @@ export function UserForm({onSubmit, onCancel, editingUser, apiErrors}: UserFormP
     // Quando o usuário de edição mudar, atualiza o formulário
     useEffect(() => {
         if (editingUser) {
-            // Pega apenas o primeiro perfil para usar como perfil principal
             const primaryRole = editingUser.roles.length > 0 ? editingUser.roles[0] : null;
 
             setFormData({
                 name: editingUser.name,
                 email: editingUser.email,
-                password: '', // Senha vazia na edição
+                password: '',
                 confirmPassword: '',
                 active: editingUser.active,
-                role: primaryRole, // Usar apenas o primeiro perfil
+                role: primaryRole,
             });
         }
     }, [editingUser]);
@@ -119,7 +118,6 @@ export function UserForm({onSubmit, onCancel, editingUser, apiErrors}: UserFormP
         if (apiErrors) {
             const newErrors = {...errors};
 
-            // Mapeie os erros da API para os campos do formulário
             if (apiErrors.email) {
                 newErrors.email = apiErrors.email;
             }
@@ -143,36 +141,28 @@ export function UserForm({onSubmit, onCancel, editingUser, apiErrors}: UserFormP
             role: '',
         };
 
-        // Validação do nome
         if (!formData.name.trim()) {
             newErrors.name = 'O nome é obrigatório';
         }
 
-        // Validação básica de email
         if (!formData.email) {
             newErrors.email = 'O email é obrigatório';
         } else if (!formData.email.includes('@')) {
             newErrors.email = 'Email inválido';
         }
 
-        // Validação de senhas
-        // Em modo de edição, só validamos as senhas se alguma delas for preenchida
         if (!(isEditMode && !formData.password && !formData.confirmPassword)) {
-            // Se ambos os campos de senha estiverem preenchidos, verifica se são iguais
             if (formData.password || formData.confirmPassword) {
-                // Valida se senha tem pelo menos 8 caracteres
                 if (formData.password && formData.password.length < 8) {
                     newErrors.password = 'A senha deve ter pelo menos 8 caracteres';
                 }
 
-                // Valida se as senhas são iguais (quando ambas estão preenchidas)
                 if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
                     newErrors.confirmPassword = 'As senhas não coincidem';
                 }
             }
         }
 
-        // Validação de perfil
         if (!formData.role) {
             newErrors.role = 'Selecione um perfil de acesso';
         }
@@ -183,25 +173,16 @@ export function UserForm({onSubmit, onCancel, editingUser, apiErrors}: UserFormP
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Verificando senhas:', {
-            senha: formData.password,
-            confirmacao: formData.confirmPassword,
-            saoIguais: formData.password === formData.confirmPassword
-        });
 
         if (validateForm()) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const {confirmPassword, role, ...restData} = formData;
 
-            // Cria o payload com o role dentro de um array roles
             const submitData: UserFormData = {
                 ...restData,
-                roles: role ? [role] : [] // Converte o perfil único para o formato de array esperado pela API
+                roles: role ? [role] : []
             };
 
-            // Se estiver em modo de edição e não tiver senha, remove do payload
             if (isEditMode && !submitData.password) {
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const {password, ...dataWithoutPassword} = submitData;
                 onSubmit(dataWithoutPassword);
             } else {
@@ -214,7 +195,6 @@ export function UserForm({onSubmit, onCancel, editingUser, apiErrors}: UserFormP
         const newPassword = e.target.value;
         setFormData(prev => ({...prev, password: newPassword}));
 
-        // Valida em tempo real se a confirmação de senha já foi digitada
         if (formData.confirmPassword) {
             const newErrors = {...errors};
             if (newPassword !== formData.confirmPassword) {
@@ -230,7 +210,6 @@ export function UserForm({onSubmit, onCancel, editingUser, apiErrors}: UserFormP
         const newConfirmPassword = e.target.value;
         setFormData(prev => ({...prev, confirmPassword: newConfirmPassword}));
 
-        // Valida em tempo real
         if (formData.password) {
             const newErrors = {...errors};
             if (formData.password !== newConfirmPassword) {
@@ -242,7 +221,6 @@ export function UserForm({onSubmit, onCancel, editingUser, apiErrors}: UserFormP
         }
     };
 
-    // Função auxiliar para obter o nome de exibição de um perfil
     const getRoleDisplayName = (authority: string): string => {
         switch (authority) {
             case 'ADMINISTRADOR':
@@ -258,16 +236,37 @@ export function UserForm({onSubmit, onCancel, editingUser, apiErrors}: UserFormP
         <Box
             component="form"
             onSubmit={handleSubmit}
-            sx={isEditMode ? {p: 3} : formContainerStyles}
+            sx={{
+                ...(isEditMode ? {
+                    p: isSmallScreen ? 1 : 3,
+                    width: '100%',
+                    boxSizing: 'border-box'
+                } : formContainerStyles),
+                width: '100%',
+                maxWidth: '100%',
+                boxSizing: 'border-box',
+                overflowX: 'hidden'
+            }}
         >
             {!isEditMode && (
-                <Typography variant="h5" color="white" gutterBottom sx={{mb: 4}}>
+                <Typography variant="h5" color="white" gutterBottom sx={{mb: isSmallScreen ? 2 : 4}}>
                     Novo Usuário
                 </Typography>
             )}
 
-            <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 3}}>
-                <Box sx={{flex: '1 1 45%', minWidth: '300px'}}>
+            <Box sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: isSmallScreen ? 2 : 3,
+                '& > *': {
+                    flex: '1 1 100%',
+                    minWidth: '0',
+                    [theme.breakpoints.up('sm')]: {
+                        flex: '1 1 45%'
+                    }
+                }
+            }}>
+                <Box>
                     <StyledTextField
                         label="Nome Completo"
                         placeholder="Digite o nome completo do usuário"
@@ -285,10 +284,35 @@ export function UserForm({onSubmit, onCancel, editingUser, apiErrors}: UserFormP
                         }}
                         error={!!errors.name}
                         helperText={errors.name}
+                        sx={{
+                            '& .MuiOutlinedInput-input': {
+                                padding: isSmallScreen ? '12px 14px' : '14px 16px',
+                                fontSize: isSmallScreen ? '0.9rem' : '1rem',
+                                height: '23px',
+                            },
+                            '& .MuiInputLabel-root': {
+                                fontSize: isSmallScreen ? '0.875rem' : '1rem',
+                            },
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': {
+                                    borderColor: '#FFD700', // Cor dourada para a borda
+                                },
+                                '&:hover fieldset': {
+                                    borderColor: '#FFD700', // Cor dourada para a borda ao passar o mouse
+                                },
+                                '&.Mui-focused fieldset': {
+                                    borderColor: '#FFD700', // Cor dourada para a borda quando estiver em foco
+                                },
+                            },
+                            '& .MuiInputBase-root': {
+                                width: '100%',
+                            }
+                        }}
                     />
+
                 </Box>
 
-                <Box sx={{flex: '1 1 45%', minWidth: '300px'}}>
+                <Box>
                     <StyledTextField
                         label="Email"
                         placeholder="Digite o endereço de email"
@@ -300,7 +324,6 @@ export function UserForm({onSubmit, onCancel, editingUser, apiErrors}: UserFormP
                             const email = e.target.value;
                             setFormData(prev => ({...prev, email}));
 
-                            // Validação básica
                             if (email && !email.includes('@')) {
                                 setErrors(prev => ({...prev, email: 'Email inválido'}));
                             } else {
@@ -309,10 +332,25 @@ export function UserForm({onSubmit, onCancel, editingUser, apiErrors}: UserFormP
                         }}
                         error={!!errors.email}
                         helperText={errors.email}
+                        sx={{
+                            '& .MuiOutlinedInput-input': {
+                                padding: isSmallScreen ? '12px 14px' : '14px 16px', // Ajusta o padding
+                                fontSize: isSmallScreen ? '0.9rem' : '1rem', // Ajuste do tamanho da fonte
+                                height: '23px', // Definindo altura fixa
+                            },
+                            '& .MuiInputLabel-root': {
+                                fontSize: isSmallScreen ? '0.875rem' : '1rem', // Ajuste da fonte do label
+                            },
+                            '& .MuiInputBase-root': {
+                                width: '100%', // Garantir que o input ocupe toda a largura
+                            }
+                        }}
                     />
+
+
                 </Box>
 
-                <Box sx={{flex: '1 1 45%', minWidth: '300px'}}>
+                <Box>
                     <StyledTextField
                         label={isEditMode ? "Nova Senha (opcional)" : "Senha"}
                         placeholder={isEditMode ? "Deixe em branco para manter a senha atual" : "Digite a senha do usuário"}
@@ -336,10 +374,24 @@ export function UserForm({onSubmit, onCancel, editingUser, apiErrors}: UserFormP
                                 </InputAdornment>
                             ),
                         }}
+                        sx={{
+                            '& .MuiOutlinedInput-input': {
+                                padding: isSmallScreen ? '12px 14px' : '14px 16px', // Ajusta o padding
+                                fontSize: isSmallScreen ? '0.9rem' : '1rem', // Ajuste do tamanho da fonte
+                                height: '23px', // Definindo altura fixa
+                            },
+                            '& .MuiInputLabel-root': {
+                                fontSize: isSmallScreen ? '0.875rem' : '1rem', // Ajuste da fonte do label
+                            },
+                            '& .MuiInputBase-root': {
+                                width: '100%', // Garantir que o input ocupe toda a largura
+                            }
+                        }}
                     />
+
                 </Box>
 
-                <Box sx={{flex: '1 1 45%', minWidth: '300px'}}>
+                <Box>
                     <StyledTextField
                         label={isEditMode ? "Confirmar Nova Senha" : "Confirmar Senha"}
                         placeholder={isEditMode ? "Confirme a nova senha (se alterada)" : "Digite a senha novamente"}
@@ -363,14 +415,31 @@ export function UserForm({onSubmit, onCancel, editingUser, apiErrors}: UserFormP
                                 </InputAdornment>
                             ),
                         }}
+                        sx={{
+                            '& .MuiOutlinedInput-input': {
+                                padding: isSmallScreen ? '12px 14px' : '14px 16px', // Ajusta o padding
+                                fontSize: isSmallScreen ? '0.9rem' : '1rem', // Ajuste do tamanho da fonte
+                                height: '23px', // Definindo altura fixa
+                            },
+                            '& .MuiInputLabel-root': {
+                                fontSize: isSmallScreen ? '0.875rem' : '1rem', // Ajuste da fonte do label
+                            },
+                            '& .MuiInputBase-root': {
+                                width: '100%', // Garantir que o input ocupe toda a largura
+                            }
+                        }}
                     />
+
                 </Box>
 
-                <Box sx={{flex: '1 1 45%', minWidth: '300px'}}>
+                <Box>
                     <FormControl fullWidth>
                         <InputLabel
                             id="roles-label"
-                            sx={inputLabelStyles}
+                            sx={{
+                                fontSize: isSmallScreen ? '0.875rem' : '1rem', // Ajuste do tamanho da fonte para o label
+                                color: '#FFD700'
+                            }}
                         >
                             Perfil de Acesso
                         </InputLabel>
@@ -391,23 +460,33 @@ export function UserForm({onSubmit, onCancel, editingUser, apiErrors}: UserFormP
                                     const selectedRole = availableRoles.find(role => role.id === selectedId) || null;
                                     setFormData({...formData, role: selectedRole});
 
-                                    // Limpa o erro de role se alguma for selecionada
                                     if (selectedRole && errors.role) {
                                         setErrors(prev => ({...prev, role: ''}));
                                     } else if (!selectedRole) {
                                         setErrors(prev => ({...prev, role: 'Selecione um perfil de acesso'}));
                                     }
 
-                                    // Fecha o menu após seleção
                                     setSelectOpen(false);
                                 }}
                                 label="Perfil de Acesso"
                                 MenuProps={{
                                     ...menuPaperProps,
-                                    // Garante que o menu fecha ao clicar em um item
                                     disableAutoFocusItem: true,
                                 }}
                                 error={!!errors.role}
+                                sx={{
+                                    '& .MuiSelect-select': {
+                                        padding: isSmallScreen ? '12px 14px' : '14px 16px', // Ajusta o padding
+                                        fontSize: isSmallScreen ? '0.9rem' : '1rem', // Ajuste do tamanho da fonte
+                                        height: '23px', // Define a altura do input
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        fontSize: isSmallScreen ? '0.875rem' : '1rem', // Ajuste do tamanho da fonte do label
+                                    },
+                                    '& .MuiInputBase-root': {
+                                        width: '100%', // Garante que o select ocupe toda a largura
+                                    }
+                                }}
                             >
                                 {availableRoles.map(role => (
                                     <StyledMenuItem key={role.id} value={role.id}>
@@ -427,9 +506,10 @@ export function UserForm({onSubmit, onCancel, editingUser, apiErrors}: UserFormP
                             </Typography>
                         )}
                     </FormControl>
+
                 </Box>
 
-                <Box sx={{width: '100%'}}>
+                <Box sx={{width: '100%', mt: isSmallScreen ? -1 : 0}}>
                     <FormControlLabel
                         control={
                             <StyledSwitch
@@ -442,7 +522,13 @@ export function UserForm({onSubmit, onCancel, editingUser, apiErrors}: UserFormP
                     />
                 </Box>
 
-                <Box sx={{width: '100%', display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2}}>
+                <Box sx={{
+                    width: '100%',
+                    display: 'flex',
+                    gap: 2,
+                    justifyContent: 'flex-end',
+                    mt: isSmallScreen ? 1 : 2
+                }}>
                     <Button
                         type="button"
                         onClick={onCancel}
@@ -462,4 +548,4 @@ export function UserForm({onSubmit, onCancel, editingUser, apiErrors}: UserFormP
             </Box>
         </Box>
     );
-} 
+}
