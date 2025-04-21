@@ -47,18 +47,18 @@ export const StyledTextField = styled(TextField)({
         width: '70%',
         margin: '0 auto',
         textAlign: 'center',
-    },
-    '@media (min-width: 375px) and (max-width: 600px)': {
-        width: '85%',
-    },
-    '@media (min-width: 425px) and (max-width: 600px)': {
-        width: '100%',
-    },
-    '@media (min-width: 414px) and (max-width: 600px)': {
-        width: '92%',
-    },
-    '@media (min-width: 412px) and (max-width: 600px)': {
-        width: '95%',
+        '@media (min-width: 375px)': {
+            width: '85%',
+        },
+        '@media (min-width: 412px)': {
+            width: '95%',
+        },
+        '@media (min-width: 414px)': {
+            width: '92%',
+        },
+        '@media (min-width: 425px)': {
+            width: '100%',
+        },
     }
 });
 
@@ -85,10 +85,20 @@ export const StyledSelect = styled(Select)({
     '& .MuiMenu-paper': {
         backgroundColor: '#242424',
     },
-    '@media (max-width: 572px)': {
+    '@media (min-width: 320px) and (max-width: 600px)': {
         width: '70%',
-        margin: '0 auto',
-        textAlign: 'center',
+        '@media (min-width: 375px)': {
+            width: '85%',
+        },
+        '@media (min-width: 412px)': {
+            width: '95%',
+        },
+        '@media (min-width: 414px)': {
+            width: '92%',
+        },
+        '@media (min-width: 425px)': {
+            width: '100%',
+        },
     }
 });
 
