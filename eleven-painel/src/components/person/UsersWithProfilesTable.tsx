@@ -124,7 +124,7 @@ export function UsersWithProfilesTable() {
             <TableContainer component={Paper} sx={{backgroundColor: '#1a1a1a'}}>
                 <Table>
                     <TableHead>
-                        <TableRow>
+                        <TableRow sx={{borderBottom: '1px solid rgba(224, 224, 224, 1)'}}>
                             <TableCell sx={{color: '#FFD700', fontWeight: 'bold'}}>Nome</TableCell>
                             <TableCell sx={{color: '#FFD700', fontWeight: 'bold'}}>Telefone</TableCell>
                             <TableCell sx={{color: '#FFD700', fontWeight: 'bold'}}>Mãe</TableCell>
@@ -135,7 +135,14 @@ export function UsersWithProfilesTable() {
                     </TableHead>
                     <TableBody>
                         {users.map((user) => (
-                            <TableRow key={user.id} hover sx={{'&:hover': {backgroundColor: '#333'}}}>
+                            <TableRow
+                                key={user.id}
+                                hover
+                                sx={{
+                                    borderBottom: '1px solid rgba(224, 224, 224, 0.4)',
+                                    '&:hover': {backgroundColor: '#333'},
+                                }}
+                            >
                                 <TableCell sx={{color: 'white'}}>{user.name}</TableCell>
                                 <TableCell sx={{color: 'white'}}>{user.phone}</TableCell>
                                 <TableCell sx={{color: 'white'}}>{user.motherName}</TableCell>
