@@ -124,7 +124,7 @@ export function UsersWithProfilesTable() {
             <TableContainer component={Paper} sx={{backgroundColor: '#1a1a1a'}}>
                 <Table>
                     <TableHead>
-                        <TableRow sx={{backgroundColor: '#333'}}>
+                        <TableRow>
                             <TableCell sx={{color: '#FFD700', fontWeight: 'bold'}}>Nome</TableCell>
                             <TableCell sx={{color: '#FFD700', fontWeight: 'bold'}}>Telefone</TableCell>
                             <TableCell sx={{color: '#FFD700', fontWeight: 'bold'}}>Mãe</TableCell>
