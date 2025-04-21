@@ -298,7 +298,15 @@ export function ProfileForm({onSubmit, user, apiErrors}: ProfileFormProps) {
                 </Box>
             </Box>
 
-            <Box sx={{mt: 4, display: 'flex', justifyContent: 'flex-end'}}>
+            <Box sx={{
+                mt: 4,
+                display: 'flex',
+                justifyContent: 'flex-end',
+                '@media (max-width: 600px)': {
+                    justifyContent: 'center',
+                },
+            }}
+            >
                 <Button
                     type="submit"
                     variant="contained"
