@@ -319,8 +319,10 @@ export default function LoginPage() {
                 sx={{
                     marginTop: '20px',
                     '& .MuiPaper-root': {
-                        backgroundColor: '#242424',
-                    }
+                        backgroundColor: 'rgba(211, 47, 47, 0.85)', // Fundo vermelho
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)', // Sombra para destaque
+                        borderRadius: '8px', // Bordas arredondadas
+                    },
                 }}
             >
                 <Alert
@@ -328,14 +330,25 @@ export default function LoginPage() {
                     onClose={() => setSnackbar({...snackbar, open: false})}
                     sx={{
                         width: '100%',
-                        backgroundColor: snackbar.severity === 'error' ? '#ff44447a' : '#4caf507a',
                         color: '#fff',
+                        display: 'flex',
+                        alignItems: 'center',
                         '.MuiAlert-icon': {
-                            color: snackbar.severity === 'error' ? '#ff4444' : '#4caf50'
+                            color: 'inherit',
+                            opacity: 0.9,
+                            padding: '0 8px 0 0',
+                        },
+                        '.MuiAlert-message': {
+                            padding: '8px 0',
                         },
                         '.MuiAlert-action': {
-                            color: '#fff'
-                        }
+                            padding: '0 0 0 8px',
+                            color: 'inherit',
+                            opacity: 0.7,
+                            '&:hover': {
+                                opacity: 1,
+                            },
+                        },
                     }}
                 >
                     {snackbar.message}
