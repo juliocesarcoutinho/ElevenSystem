@@ -437,8 +437,11 @@ export function UserForm({onSubmit, onCancel, editingUser, apiErrors}: UserFormP
                         <InputLabel
                             id="roles-label"
                             sx={{
-                                fontSize: isSmallScreen ? '0.875rem' : '1rem', // Ajuste do tamanho da fonte para o label
-                                color: '#FFD700'
+                                fontSize: isSmallScreen ? '0.875rem' : '1rem',
+                                color: '#FFD700',
+                                '&.Mui-focused': {
+                                    color: '#FFD700',
+                                },
                             }}
                         >
                             Perfil de Acesso

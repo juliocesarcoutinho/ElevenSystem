@@ -32,7 +32,7 @@ export const StyledTextField = styled(TextField)({
         },
     },
     '& .MuiInputLabel-root': {
-        color: 'rgba(255, 255, 255, 0.7)',
+        color: '#FFD700',
     },
     '& .Mui-error .MuiOutlinedInput-notchedOutline': {
         borderColor: '#ff4444',
