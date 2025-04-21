@@ -15,6 +15,7 @@ export const StyledTextField = styled(TextField)({
         },
         '& input': {
             color: '#fff',
+            padding: '1rem',
         },
         '& input:-webkit-autofill': {
             WebkitBoxShadow: '0 0 0 30px #242424 inset',
@@ -30,19 +31,19 @@ export const StyledTextField = styled(TextField)({
             WebkitTextFillColor: '#fff',
         },
     },
-    '& .MuiFormLabel-root': {
+    '& .MuiInputLabel-root': {
         color: 'rgba(255, 255, 255, 0.7)',
-        '&.Mui-focused': {
-            color: '#FFD700',
-        },
+    },
+    '& .Mui-error .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#ff4444',
+    },
+    '& .Mui-error.MuiFormLabel-root': {
+        color: '#ff4444',
     },
     '& .MuiFormHelperText-root': {
         color: '#ff4444',
     },
-    '& .MuiOutlinedInput-input': {
-        padding: '14px 16px',
-    },
-    marginBottom: 2,
+    marginBottom: '1.5rem',
 });
 
 export const StyledSelect = styled(Select)({

@@ -3,70 +3,24 @@
 import {FormEvent, useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  InputAdornment,
-  Snackbar,
-  TextField,
-  Typography
+    Alert,
+    Box,
+    Button,
+    CircularProgress,
+    Container,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    IconButton,
+    InputAdornment,
+    Snackbar,
+    Typography
 } from '@mui/material';
-import {styled} from '@mui/material/styles';
 import {LoginService} from '@/services/LoginService';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-
-const StyledTextField = styled(TextField)({
-    '& .MuiOutlinedInput-root': {
-        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-        '& fieldset': {
-            borderColor: 'rgba(255, 255, 255, 0.2)',
-        },
-        '&:hover fieldset': {
-            borderColor: '#FFD700',
-        },
-        '&.Mui-focused fieldset': {
-            borderColor: '#FFD700',
-        },
-        '& input': {
-            color: '#fff',
-            padding: '1rem',
-        },
-        '& input:-webkit-autofill': {
-            WebkitBoxShadow: '0 0 0 30px #242424 inset',
-            WebkitTextFillColor: '#fff',
-            caretColor: '#fff',
-        },
-        '& input:-webkit-autofill:hover': {
-            WebkitBoxShadow: '0 0 0 30px #242424 inset',
-            WebkitTextFillColor: '#fff',
-        },
-        '& input:-webkit-autofill:focus': {
-            WebkitBoxShadow: '0 0 0 30px #242424 inset',
-            WebkitTextFillColor: '#fff',
-        },
-    },
-    '& .MuiInputLabel-root': {
-        color: 'rgba(255, 255, 255, 0.7)',
-    },
-    '& .Mui-error .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#ff4444',
-    },
-    '& .Mui-error.MuiFormLabel-root': {
-        color: '#ff4444',
-    },
-    '& .MuiFormHelperText-root': {
-        color: '#ff4444',
-    },
-    marginBottom: '1.5rem',
-});
+import {StyledTextField} from '@/styles/components/forms.styles';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
