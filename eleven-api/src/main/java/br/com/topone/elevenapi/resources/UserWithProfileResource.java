@@ -2,6 +2,8 @@ package br.com.topone.elevenapi.resources;
 
 import br.com.topone.elevenapi.records.UserWithProfileRecord;
 import br.com.topone.elevenapi.service.usuario.UserWithProfileService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,8 +23,8 @@ public class UserWithProfileResource {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserWithProfileRecord>> getAllUsersWithProfiles() {
-        List<UserWithProfileRecord> usersWithProfiles = userWithProfileService.getAllUsersWithProfiles();
+    public ResponseEntity<Page<UserWithProfileRecord>> getAllUsersWithProfiles(Pageable pageable) {
+        Page<UserWithProfileRecord> usersWithProfiles = userWithProfileService.getAllUsersWithProfiles(pageable);
         return ResponseEntity.ok(usersWithProfiles);
     }
 

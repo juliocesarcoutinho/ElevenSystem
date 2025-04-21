@@ -1,12 +1,10 @@
-'use client';
-
 import {DashboardLayout} from '@/components/layout/DashboardLayout';
-import {UnderConstruction} from '@/components/UnderConstruction';
+import {UsersWithProfilesTable} from "@/components/person/UsersWithProfilesTable";
 
-export default function PersonPage() {
+export default function UsersWithProfilesPage() {
     return (
         <DashboardLayout>
-            <UnderConstruction pageName="Pessoas / Adolescentes"/>
+            <UsersWithProfilesTable/>
         </DashboardLayout>
     );
-} 
+}

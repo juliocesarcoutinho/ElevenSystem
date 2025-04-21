@@ -3,6 +3,8 @@ package br.com.topone.elevenapi.service.usuario;
 import br.com.topone.elevenapi.entities.User;
 import br.com.topone.elevenapi.records.UserWithProfileRecord;
 import br.com.topone.elevenapi.repositories.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,11 +21,9 @@ public class UserWithProfileService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserWithProfileRecord> getAllUsersWithProfiles() {
-        List<User> users = userRepository.findAll();
-        return users.stream()
-                .map(UserWithProfileRecord::new)
-                .collect(Collectors.toList());
+    public Page<UserWithProfileRecord> getAllUsersWithProfiles(Pageable pageable) {
+        return userRepository.findAll(pageable)
+                .map(UserWithProfileRecord::new);
     }
 
     @Transactional(readOnly = true)

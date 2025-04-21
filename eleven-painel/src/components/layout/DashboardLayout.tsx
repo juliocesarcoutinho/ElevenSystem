@@ -1,3 +1,4 @@
+'use client';
 import {Box, useMediaQuery, useTheme} from '@mui/material';
 import {ReactNode, useEffect, useState} from 'react';
 import {Navbar} from './Navbar';
