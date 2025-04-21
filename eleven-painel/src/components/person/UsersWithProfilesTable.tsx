@@ -1,6 +1,5 @@
 'use client';
-import {useEffect, useState} from 'react';
-import {UserWithProfile, UserWithProfileService} from '@/services/UserWithProfileService';
+
 import {
     Box,
     CircularProgress,
@@ -20,223 +19,217 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ClearIcon from '@mui/icons-material/Clear';
+import {useEffect, useMemo, useRef, useState} from 'react';
+import {UserWithProfileService} from '@/services/UserWithProfileService';
+
+interface UserWithProfile {
+    id: number;
+    name: string;
+    email: string;
+    phone: string;
+    motherName: string;
+    fatherName: string;
+    addresses: {
+        street: string;
+        number: string;
+        district: string;
+        city: string;
+        uf: string;
+    }[];
+}
 
 export function UsersWithProfilesTable() {
     const [users, setUsers] = useState<UserWithProfile[]>([]);
-    const [filteredUsers, setFilteredUsers] = useState<UserWithProfile[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [totalElements, setTotalElements] = useState(0);
     const [page, setPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-    const [totalElements, setTotalElements] = useState(0);
     const [searchTerm, setSearchTerm] = useState('');
-    const [sortConfig, setSortConfig] = useState<{ key: 'name'; direction: 'ascending' | 'descending' }>({
-        key: 'name',
-        direction: 'ascending'
-    });
+    const [isLoading, setIsLoading] = useState(true);
+    const [localSearchTerm, setLocalSearchTerm] = useState('');
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+    const loadUsers = async () => {
+        setIsLoading(true);
+        try {
+            const response = await UserWithProfileService.getUsersWithProfiles(
+                page,
+                rowsPerPage,
+                'name,asc',
+                searchTerm
+            );
+            setUsers(response.content);
+            setTotalElements(response.totalElements);
+        } catch (error) {
+            console.error('Erro ao carregar usuários:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const loadUsers = async () => {
-            setIsLoading(true);
-            try {
-                const response = await UserWithProfileService.getAllUsersWithProfiles(page - 1, rowsPerPage, 'name,asc');
-                setUsers(response.content);
-                setFilteredUsers(response.content);
-                setTotalElements(response.totalElements);
-            } catch (error) {
-                console.error('Erro ao carregar usuários:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         loadUsers();
-    }, [page, rowsPerPage]);
+    }, [page, rowsPerPage, searchTerm]);
 
-    useEffect(() => {
-        if (searchTerm.trim() === '') {
-            setFilteredUsers([...users]);
-            return;
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newSearchTerm = e.target.value;
+        setLocalSearchTerm(newSearchTerm);
+
+        if (timerRef.current) {
+            clearTimeout(timerRef.current);
         }
 
-        const filtered = users.filter(user =>
-            user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.motherName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.fatherName.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        setFilteredUsers(filtered);
-    }, [searchTerm, users]);
-
-    useEffect(() => {
-        const sortedUsers = [...filteredUsers].sort((a, b) => {
-            if (a[sortConfig.key] < b[sortConfig.key]) {
-                return sortConfig.direction === 'ascending' ? -1 : 1;
-            }
-            if (a[sortConfig.key] > b[sortConfig.key]) {
-                return sortConfig.direction === 'ascending' ? 1 : -1;
-            }
-            return 0;
-        });
-        setFilteredUsers(sortedUsers);
-    }, [sortConfig]);
-
-    const requestSort = (key: 'name') => {
-        let direction: 'ascending' | 'descending' = 'ascending';
-        if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-            direction = 'descending';
-        }
-        setSortConfig({key, direction});
+        timerRef.current = setTimeout(() => {
+            setSearchTerm(newSearchTerm);
+            setPage(1); // Reset para a primeira página ao buscar
+        }, 500);
     };
 
-    const formatAddress = (addresses: any[]) => {
-        if (!addresses || addresses.length === 0) return 'N/A';
-        const address = addresses[0];
-        return `${address.street}, ${address.number} - ${address.district}, ${address.city}/${address.uf}`;
+    const handleClearSearch = () => {
+        setLocalSearchTerm('');
+        setSearchTerm('');
+        setPage(1);
     };
 
-    const handleEdit = (userId: number) => {
-        // Implementar lógica de edição
-        console.log('Editar usuário:', userId);
+    const handlePageChange = (_: React.ChangeEvent<unknown>, newPage: number) => {
+        setPage(newPage);
     };
 
-    const handleDelete = (userId: number) => {
-        // Implementar lógica de exclusão
-        console.log('Excluir usuário:', userId);
+    const formatAddress = (addresses: UserWithProfile['addresses']) => {
+        if (!addresses?.length) return 'N/A';
+        const {street, number, district, city, uf} = addresses[0];
+        return `${street}, ${number} - ${district}, ${city}/${uf}`;
     };
 
-    return (
-        <Box sx={{p: 3, backgroundColor: '#1a1a1a', color: 'white'}}>
-            <Typography variant="h4" sx={{mb: 1, color: 'white', fontWeight: 'bold'}}>
-                Usuários com Perfis
-            </Typography>
-            <TextField
-                placeholder="Digite para buscar..."
-                variant="outlined"
-                fullWidth
-                sx={{
-                    mb: 3,
-                    '& .MuiOutlinedInput-root': {
-                        '& fieldset': {
-                            borderColor: '#FFD700',
-                        },
-                        '&:hover fieldset': {
-                            borderColor: '#FFD700',
-                        },
-                        '&.Mui-focused fieldset': {
-                            borderColor: '#FFD700',
-                        },
-                    },
-                    '& .MuiInputBase-input': {
-                        color: 'white',
-                        '&::placeholder': {
-                            opacity: 1,
-                            color: '#aaa'
-                        }
-                    },
-                }}
-                InputProps={{
-                    startAdornment: (
-                        <InputAdornment position="start">
-                            <SearchIcon sx={{color: '#FFD700'}}/>
-                        </InputAdornment>
-                    ),
-                }}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-            />
-
-            {isLoading ? (
-                <Box sx={{display: 'flex', justifyContent: 'center', mt: 4}}>
+    const memoizedTableContent = useMemo(() => {
+        if (isLoading) {
+            return (
+                <Box sx={{display: 'flex', justifyContent: 'center', p: 4}}>
                     <CircularProgress sx={{color: '#FFD700'}}/>
                 </Box>
-            ) : (
-                <>
-                    <TableContainer component={Paper} sx={{backgroundColor: '#1a1a1a'}}>
-                        <Table>
-                            <TableHead>
-                                <TableRow sx={{backgroundColor: '#333'}}>
-                                    <TableCell
-                                        sx={{color: '#FFD700', fontWeight: 'bold', cursor: 'pointer'}}
-                                        onClick={() => requestSort('name')}
-                                    >
-                                        Nome
-                                        {sortConfig.key === 'name' && (
-                                            sortConfig.direction === 'ascending' ?
-                                                <ArrowUpwardIcon sx={{ml: 1, fontSize: '1rem'}}/> :
-                                                <ArrowDownwardIcon sx={{ml: 1, fontSize: '1rem'}}/>
-                                        )}
-                                    </TableCell>
-                                    <TableCell sx={{color: '#FFD700', fontWeight: 'bold'}}>Telefone</TableCell>
-                                    <TableCell sx={{color: '#FFD700', fontWeight: 'bold'}}>Mãe</TableCell>
-                                    <TableCell sx={{color: '#FFD700', fontWeight: 'bold'}}>Pai</TableCell>
-                                    <TableCell sx={{color: '#FFD700', fontWeight: 'bold'}}>Endereço</TableCell>
-                                    <TableCell sx={{color: '#FFD700', fontWeight: 'bold'}}>Ações</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {filteredUsers.map((user) => (
-                                    <TableRow key={user.id} sx={{'&:hover': {backgroundColor: '#333'}}}>
-                                        <TableCell sx={{color: 'white'}}>{user.name}</TableCell>
-                                        <TableCell sx={{color: 'white'}}>{user.phone}</TableCell>
-                                        <TableCell sx={{color: 'white'}}>{user.motherName}</TableCell>
-                                        <TableCell sx={{color: 'white'}}>{user.fatherName}</TableCell>
-                                        <TableCell sx={{color: 'white'}}>{formatAddress(user.addresses)}</TableCell>
-                                        <TableCell>
-                                            <IconButton
-                                                onClick={() => handleEdit(user.id)}
-                                                sx={{
-                                                    color: '#FFD700',
-                                                    mr: 1,
-                                                    '&:hover': {
-                                                        bgcolor: 'rgba(255, 215, 0, 0.1)',
-                                                    }
-                                                }}
-                                                size="small"
-                                            >
-                                                <EditIcon/>
-                                            </IconButton>
-                                            <IconButton
-                                                onClick={() => handleDelete(user.id)}
-                                                sx={{
-                                                    color: '#f44336',
-                                                    '&:hover': {
-                                                        bgcolor: 'rgba(244, 67, 54, 0.1)',
-                                                    }
-                                                }}
-                                                size="small"
-                                            >
-                                                <DeleteIcon/>
-                                            </IconButton>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+            );
+        }
 
-                    <Box sx={{display: 'flex', justifyContent: 'center', mt: 3, p: 2}}>
+        if (!users.length) {
+            return (
+                <Box sx={{display: 'flex', justifyContent: 'center', p: 4}}>
+                    <Typography color="white">
+                        {searchTerm ? 'Nenhum resultado encontrado' : 'Nenhum usuário cadastrado'}
+                    </Typography>
+                </Box>
+            );
+        }
+
+        return (
+            <TableContainer component={Paper} sx={{backgroundColor: '#1a1a1a'}}>
+                <Table>
+                    <TableHead>
+                        <TableRow sx={{backgroundColor: '#333'}}>
+                            <TableCell sx={{color: '#FFD700', fontWeight: 'bold'}}>Nome</TableCell>
+                            <TableCell sx={{color: '#FFD700', fontWeight: 'bold'}}>Telefone</TableCell>
+                            <TableCell sx={{color: '#FFD700', fontWeight: 'bold'}}>Mãe</TableCell>
+                            <TableCell sx={{color: '#FFD700', fontWeight: 'bold'}}>Pai</TableCell>
+                            <TableCell sx={{color: '#FFD700', fontWeight: 'bold'}}>Endereço</TableCell>
+                            <TableCell sx={{color: '#FFD700', fontWeight: 'bold'}}>Ações</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {users.map((user) => (
+                            <TableRow key={user.id} hover sx={{'&:hover': {backgroundColor: '#333'}}}>
+                                <TableCell sx={{color: 'white'}}>{user.name}</TableCell>
+                                <TableCell sx={{color: 'white'}}>{user.phone}</TableCell>
+                                <TableCell sx={{color: 'white'}}>{user.motherName}</TableCell>
+                                <TableCell sx={{color: 'white'}}>{user.fatherName}</TableCell>
+                                <TableCell sx={{color: 'white'}}>{formatAddress(user.addresses)}</TableCell>
+                                <TableCell>
+                                    <IconButton onClick={() => console.log('Editar', user.id)} sx={{color: '#FFD700'}}>
+                                        <EditIcon/>
+                                    </IconButton>
+                                    <IconButton onClick={() => console.log('Excluir', user.id)} sx={{color: '#f44336'}}>
+                                        <DeleteIcon/>
+                                    </IconButton>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        );
+    }, [users, isLoading, searchTerm]);
+
+    return (
+        <Box sx={{width: '100%', backgroundColor: '#121212', borderRadius: 2, boxShadow: 3}}>
+            <Typography variant="h4" sx={{p: 3, color: 'white'}}>
+                Usuarios / Adolescentes
+            </Typography>
+            <Box sx={{p: 3, backgroundColor: '#1a1a1a', color: 'white'}}>
+
+                <TextField
+                    fullWidth
+                    variant="outlined"
+                    placeholder="Buscar usuários..."
+                    value={localSearchTerm}
+                    onChange={handleSearchChange}
+                    sx={{
+                        mb: 3,
+                        '& .MuiOutlinedInput-root': {
+                            '& fieldset': {borderColor: '#FFD700'},
+                            '&:hover fieldset': {borderColor: '#FFD700'},
+                            '&.Mui-focused fieldset': {borderColor: '#FFD700'},
+                        },
+                        '& .MuiInputBase-input': {
+                            color: 'white',
+                            '&::placeholder': {opacity: 1, color: '#aaa'}
+                        },
+                    }}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon sx={{color: '#FFD700'}}/>
+                            </InputAdornment>
+                        ),
+                        endAdornment: localSearchTerm && (
+                            <IconButton onClick={handleClearSearch} sx={{color: '#FFD700'}}>
+                                <ClearIcon/>
+                            </IconButton>
+                        ),
+                    }}
+                />
+
+                {memoizedTableContent}
+
+                <Box sx={{mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                    <Typography variant="body2" sx={{color: 'rgba(255, 255, 255, 0.7)'}}>
+                        Itens por página: {rowsPerPage}
+                    </Typography>
+                    <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
+                        <Typography variant="body2" sx={{color: 'rgba(255, 255, 255, 0.7)'}}>
+                            {users.length > 0 ? `${((page - 1) * rowsPerPage) + 1}-${Math.min(page * rowsPerPage, totalElements)} de ${totalElements}` : '0-0 de 0'}
+                        </Typography>
                         <Pagination
                             count={Math.ceil(totalElements / rowsPerPage)}
                             page={page}
-                            onChange={(e, newPage) => setPage(newPage)}
+                            onChange={handlePageChange}
                             sx={{
                                 '& .MuiPaginationItem-root': {
                                     color: '#FFD700',
                                     '&.Mui-selected': {
-                                        backgroundColor: '#FFD700',
+                                        bgcolor: '#FFD700',
                                         color: 'black',
+                                        '&:hover': {
+                                            bgcolor: '#FFD700',
+                                            opacity: 0.8,
+                                        },
                                     },
                                     '&:hover': {
-                                        backgroundColor: '#FFD70022',
+                                        bgcolor: 'rgba(255, 215, 0, 0.1)',
                                     },
                                 },
                             }}
                         />
                     </Box>
-                </>
-            )}
+                </Box>
+            </Box>
         </Box>
     );
 }
