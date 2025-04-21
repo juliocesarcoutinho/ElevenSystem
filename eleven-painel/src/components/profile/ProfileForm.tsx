@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {Box, Button, CircularProgress, IconButton, InputAdornment} from '@mui/material';
+import {Box, Button, CircularProgress, IconButton, InputAdornment,} from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
@@ -38,6 +38,7 @@ export function ProfileForm({onSubmit, user, apiErrors}: ProfileFormProps) {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    // Quando o usuário mudar, atualiza o formulário
     useEffect(() => {
         if (user) {
             setFormData({
@@ -49,12 +50,22 @@ export function ProfileForm({onSubmit, user, apiErrors}: ProfileFormProps) {
         }
     }, [user]);
 
+    // Processar erros da API quando eles mudarem
     useEffect(() => {
         if (apiErrors) {
             const newErrors = {...errors};
-            if (apiErrors.email) newErrors.email = apiErrors.email;
-            if (apiErrors.name) newErrors.name = apiErrors.name;
-            if (apiErrors.password) newErrors.password = apiErrors.password;
+
+            // Mapeie os erros da API para os campos do formulário
+            if (apiErrors.email) {
+                newErrors.email = apiErrors.email;
+            }
+            if (apiErrors.name) {
+                newErrors.name = apiErrors.name;
+            }
+            if (apiErrors.password) {
+                newErrors.password = apiErrors.password;
+            }
+
             setErrors(newErrors);
         }
     }, [apiErrors]);
@@ -67,21 +78,27 @@ export function ProfileForm({onSubmit, user, apiErrors}: ProfileFormProps) {
             confirmPassword: '',
         };
 
+        // Validação do nome
         if (!formData.name.trim()) {
             newErrors.name = 'O nome é obrigatório';
         }
 
+        // Validação básica de email
         if (!formData.email) {
             newErrors.email = 'O email é obrigatório';
         } else if (!formData.email.includes('@')) {
             newErrors.email = 'Email inválido';
         }
 
+        // Validação de senhas
+        // Só validamos as senhas se alguma delas for preenchida
         if (formData.password || formData.confirmPassword) {
+            // Valida se senha tem pelo menos 8 caracteres
             if (formData.password && formData.password.length < 8) {
                 newErrors.password = 'A senha deve ter pelo menos 8 caracteres';
             }
 
+            // Valida se as senhas são iguais (quando ambas estão preenchidas)
             if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
                 newErrors.confirmPassword = 'As senhas não coincidem';
             }
@@ -93,7 +110,11 @@ export function ProfileForm({onSubmit, user, apiErrors}: ProfileFormProps) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Primeira validação antes de prosseguir
         const isValid = validateForm();
+
+        // Verificação extra para senha/confirmação
         if (formData.password && !formData.confirmPassword) {
             setErrors(prev => ({
                 ...prev,
@@ -106,18 +127,24 @@ export function ProfileForm({onSubmit, user, apiErrors}: ProfileFormProps) {
             setIsSubmitting(true);
 
             try {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const {confirmPassword, ...restData} = formData;
+
+                // Cria o payload mantendo os roles atuais do usuário
                 const submitData: UserFormData = {
                     ...restData,
-                    active: user.active,
-                    roles: user.roles,
+                    active: user.active, // Mantém o status atual
+                    roles: user.roles // Mantém os perfis atuais
                 };
 
+                // Se não tiver senha, remove do payload
                 if (!submitData.password) {
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     const {password, ...dataWithoutPassword} = submitData;
                     onSubmit(dataWithoutPassword);
                 } else {
                     onSubmit(submitData);
+                    // Limpa os campos de senha após o envio bem-sucedido
                     setFormData(prev => ({
                         ...prev,
                         password: '',
@@ -125,6 +152,8 @@ export function ProfileForm({onSubmit, user, apiErrors}: ProfileFormProps) {
                     }));
                 }
             } finally {
+                // Certifica-se de que o estado de submissão é resetado
+                // mesmo em caso de erro
                 setIsSubmitting(false);
             }
         }
@@ -133,6 +162,8 @@ export function ProfileForm({onSubmit, user, apiErrors}: ProfileFormProps) {
     const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newPassword = e.target.value;
         setFormData(prev => ({...prev, password: newPassword}));
+
+        // Valida em tempo real se a confirmação de senha já foi digitada
         if (formData.confirmPassword) {
             const newErrors = {...errors};
             if (newPassword !== formData.confirmPassword) {
@@ -147,6 +178,8 @@ export function ProfileForm({onSubmit, user, apiErrors}: ProfileFormProps) {
     const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newConfirmPassword = e.target.value;
         setFormData(prev => ({...prev, confirmPassword: newConfirmPassword}));
+
+        // Valida em tempo real
         if (formData.password) {
             const newErrors = {...errors};
             if (formData.password !== newConfirmPassword) {
@@ -165,7 +198,7 @@ export function ProfileForm({onSubmit, user, apiErrors}: ProfileFormProps) {
             sx={{p: 3}}
         >
             <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 3}}>
-                <Box sx={{flex: '1 1 100%', minWidth: 'auto'}}>
+                <Box sx={{flex: '1 1 45%', minWidth: '300px'}}>
                     <StyledTextField
                         label="Nome Completo"
                         placeholder="Digite seu nome completo"
@@ -186,7 +219,7 @@ export function ProfileForm({onSubmit, user, apiErrors}: ProfileFormProps) {
                     />
                 </Box>
 
-                <Box sx={{flex: '1 1 100%', minWidth: 'auto'}}>
+                <Box sx={{flex: '1 1 45%', minWidth: '300px'}}>
                     <StyledTextField
                         label="Email"
                         placeholder="Digite seu endereço de email"
@@ -197,6 +230,8 @@ export function ProfileForm({onSubmit, user, apiErrors}: ProfileFormProps) {
                         onChange={(e) => {
                             const email = e.target.value;
                             setFormData(prev => ({...prev, email}));
+
+                            // Validação básica
                             if (email && !email.includes('@')) {
                                 setErrors(prev => ({...prev, email: 'Email inválido'}));
                             } else {
@@ -208,7 +243,7 @@ export function ProfileForm({onSubmit, user, apiErrors}: ProfileFormProps) {
                     />
                 </Box>
 
-                <Box sx={{flex: '1 1 100%', minWidth: 'auto'}}>
+                <Box sx={{flex: '1 1 45%', minWidth: '300px'}}>
                     <StyledTextField
                         label="Nova Senha (opcional)"
                         placeholder="Digite sua nova senha"
@@ -235,7 +270,7 @@ export function ProfileForm({onSubmit, user, apiErrors}: ProfileFormProps) {
                     />
                 </Box>
 
-                <Box sx={{flex: '1 1 100%', minWidth: 'auto'}}>
+                <Box sx={{flex: '1 1 45%', minWidth: '300px'}}>
                     <StyledTextField
                         label="Confirmar Nova Senha"
                         placeholder="Confirme sua nova senha"
