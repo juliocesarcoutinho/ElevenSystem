@@ -177,3 +177,4 @@ export const responsiveButtonStyles = {
     padding: {xs: '10px', sm: '12px'},
     marginTop: {xs: 2, sm: 3},
 };
+
