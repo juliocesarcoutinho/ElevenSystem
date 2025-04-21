@@ -20,7 +20,7 @@ import {
 import {LoginService} from '@/services/LoginService';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import {StyledTextField} from '@/styles/components/forms.styles';
+import {StyledTextField} from '@/styles/components/login.styles';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -196,7 +196,7 @@ export default function LoginPage() {
                             helperText={errors.email}
                         />
 
-                        <Typography variant="h6" mb={1} color="#fff">
+                        <Typography variant="h6" mb={1} mt={1} color="#fff">
                             Senha
                         </Typography>
                         <StyledTextField
@@ -228,7 +228,7 @@ export default function LoginPage() {
                             }}
                         />
 
-                        <Box textAlign="center" mb={3}>
+                        <Box textAlign="center" mb={3} mt={1}>
                             <Button
                                 onClick={() => setShowDialog(true)}
                                 sx={{

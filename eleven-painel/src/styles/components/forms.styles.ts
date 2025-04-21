@@ -44,7 +44,7 @@ export const StyledTextField = styled(TextField)({
     },
     marginBottom: 2,
     '@media (min-width: 320px) and (max-width: 600px)': {
-        width: '70%',
+        width: '68%',
         margin: '0 auto',
         textAlign: 'center',
         '@media (min-width: 375px)': {
@@ -86,7 +86,7 @@ export const StyledSelect = styled(Select)({
         backgroundColor: '#242424',
     },
     '@media (min-width: 320px) and (max-width: 600px)': {
-        width: '70%',
+        width: '68%',
         '@media (min-width: 375px)': {
             width: '85%',
         },
